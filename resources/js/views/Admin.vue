@@ -1,6 +1,15 @@
 <template>
-  <Navbar />
   <div class="leading-normal tracking-normal text-white gradient">
+    <div
+      :class="[
+        'transparency fixed top-5 left-1/2 transform -translate-x-1/2 z-50 p-4 rounded shadow-lg transition-opacity duration-500',
+        toastVisible ? 'opacity-100' : 'opacity-0',
+        toastColor,
+      ]"
+      @transitionend="onTransitionEnd"
+    >
+      <span>{{ toastMessage }}</span>
+    </div>
     <section
       id="admin"
       class="relative flex items-center justify-center"
@@ -62,10 +71,11 @@
                     Requesting Rides
                   </h4>
                   <ul
+                    v-if="requestingRides && requestingRides.length > 0"
                     class="space-y-2 md:space-y-3 overflow-y-auto max-h-28 md:max-h-32 animate-fade-in"
                   >
                     <li
-                      v-for="ride in recentRides"
+                      v-for="ride in requestingRides"
                       :key="ride.id"
                       class="bg-gray-50 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow duration-500"
                     >
@@ -75,20 +85,24 @@
                         }}</span>
                         <div class="flex items-center space-x-2">
                           <!-- Accept Button (Check Icon) -->
+                          <!-- Accept Button -->
                           <button
-                            class="bg-lime-500 animate-fade-in text-white p-1 rounded-full hover:bg-lime-600 transition duration-300"
+                            @click="updateAcceptedStatus(ride.id, true)"
+                            class="bg-lime-500 text-white p-1 rounded-full hover:bg-lime-600 transition duration-300"
                           >
                             <Check class="w-3 h-3 md:w-4 md:h-4" />
                           </button>
-                          <!-- Decline Button (X Icon) -->
+
+                          <!-- Decline Button -->
                           <button
-                            class="animate-fade-in bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition duration-300"
+                            @click="updateAcceptedStatus(ride.id, false)"
+                            class="bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition duration-300"
                           >
                             <Ban class="w-3 h-3 md:w-4 md:h-4" />
                           </button>
                         </div>
                       </div>
-                      <div class="mt-1 text-gray-800 flex items-center animate-fade-in">
+                      <div class="mt-1 text-gray-800 flex items-center">
                         <MapPin class="w-3 h-3 md:w-4 md:h-4 text-black mr-1" />
                         {{ ride.from }}
                         <ArrowRight class="w-3 h-3 md:w-4 md:h-4 text-black mx-1" />
@@ -96,6 +110,9 @@
                       </div>
                     </li>
                   </ul>
+                  <p v-else class="text-gray-500 text-sm md:text-base">
+                    No one requested a ride.
+                  </p>
                 </div>
               </div>
             </div>
@@ -110,27 +127,38 @@
                     <ClockIcon class="w-5 h-5 md:w-6 md:h-6 text-black mr-2" />
                     Recent Rides
                   </h4>
-                  <ul class="space-y-2 md:space-y-3 overflow-y-auto max-h-28 md:max-h-32">
-                    <li
-                      v-for="ride in recentRides"
-                      :key="ride.id"
-                      class="bg-gray-50 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow duration-500"
-                    >
-                      <div class="flex justify-between items-center">
-                        <span class="text-xs md:text-sm text-gray-600">{{
-                          ride.date
-                        }}</span>
-                        <span class="text-xs md:text-sm font-medium text-lime-500">{{
-                          ride.status
-                        }}</span>
-                      </div>
-                      <div class="mt-1 text-gray-800 flex items-center">
-                        <MapPinIcon class="w-3 h-3 md:w-4 md:h-4 text-black mr-1" />
-                        {{ ride.from }}
-                        <ArrowRightIcon class="w-3 h-3 md:w-4 md:h-4 text-black mx-1" />
-                        {{ ride.to }}
-                      </div>
-                    </li>
+                  <ul class="space-y-3 overflow-y-auto max-h-32">
+                    <template v-if="recentRides.length > 0">
+                      <li
+                        v-for="ride in recentRides"
+                        :key="ride.id"
+                        class="bg-gray-50 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow duration-500"
+                      >
+                        <div class="flex justify-between items-center">
+                          <span class="text-sm text-gray-600">{{ ride.date }}</span>
+                          <span
+                            class="text-sm font-medium"
+                            :class="{
+                              'text-yellow-500': ride.status === 'Pending',
+                              'text-lime-500': ride.status === 'Completed',
+                              'text-red-500': ride.status === 'Declined',
+                            }"
+                          >
+                            {{ ride.status }}
+                          </span>
+                        </div>
+
+                        <div class="mt-1 text-gray-800 flex items-center">
+                          <MapPinIcon class="w-4 h-4 md:w-5 md:h-5 text-black mr-1" />
+                          {{ ride.from }}
+                          <ArrowRightIcon class="w-4 h-4 md:w-5 md:h-5 text-black mx-1" />
+                          {{ ride.to }}
+                        </div>
+                      </li>
+                    </template>
+                    <template v-else>
+                      <li class="text-gray-500 text-sm">Nothing to show.</li>
+                    </template>
                   </ul>
                 </div>
               </div>
@@ -143,6 +171,8 @@
 </template>
 
 <script setup>
+import { supabase } from "../supabaseClient";
+import { ref } from "vue"; // Import ref from Vue
 import {
   Check,
   Ban,
@@ -154,94 +184,193 @@ import {
   ArrowRightIcon,
 } from "lucide-vue-next";
 
-import { ref, computed } from "vue";
-const user = ref({
-  name: "John Doe",
-  email: "john.doe@example.com",
-  phone: "+1 234 567 8900",
-});
+const toastMessage = ref("");
+const toastColor = ref("");
+const toastVisible = ref(false);
 
+const showToast = (message, type) => {
+  toastMessage.value = message;
+  toastColor.value =
+    type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white";
+  toastVisible.value = true;
+
+  setTimeout(() => {
+    hideToast();
+  }, 3000);
+};
+
+const hideToast = () => {
+  toastVisible.value = false;
+};
+
+// Reactive variables
 const avatarUrl = ref(null);
-
-const recentRides = ref([
-  { id: 1, date: "May 15, 2023", from: "CED", to: "HOSTEL" },
-  { id: 2, date: "May 14, 2023", from: "LIBRARY", to: "CCIS" },
-  {
-    id: 3,
-    date: "May 13, 2023",
-    from: "NEW ADMIN",
-    to: "KINAADMAN",
-  },
-  { id: 4, date: "May 14, 2023", from: "LIBRARY", to: "CCIS" },
-  { id: 5, date: "May 14, 2023", from: "LIBRARY", to: "CCIS" },
-]);
-
 const terminalLogs = ref([
   "Welcome to Hatid Kita!",
   "System initialized...",
   "Ready for ride requests.",
 ]);
 
-const driverStatus = ref("Idle");
-const statusColors = {
-  Idle: "bg-gray-500",
-  "Finding a driver": "bg-yellow-500",
-  "Driver is on the way": "bg-blue-500",
-  "Driver has arrived": "bg-green-500",
-};
+const recentRides = ref([]);
+const requestingRides = ref([]);
 
-const statusColorClass = computed(() => statusColors[driverStatus.value]);
+// Fetch recent rides
+const fetchAllRecentRides = async () => {
+  try {
+    const { data: transactions, error } = await supabase
+      .from("transactions")
+      .select(
+        `
+        id,
+        created_at,
+        isCompleted,
+        admin_transactions (from_loc, to_loc)
+      `
+      )
+      .order("created_at", { ascending: false });
 
-const selectedLocation = ref("");
-const specificLocation = ref("");
+    if (error) {
+      console.error("Error fetching transactions:", error.message);
+      showToast("Failed to load recent rides. Please try again.", "error");
+      return;
+    }
 
-const locations = [
-  "CED",
-  "NSB",
-  "HOSTEL",
-  "NEW ADMIN",
-  "OSAS",
-  "OLD CAS",
-  "KINAADMAN",
-  "LIBRARY",
-  "CCIS",
-  "CEGS",
-  "VILLARES",
-];
-
-const callDriver = () => {
-  if (!selectedLocation.value) {
-    alert("Please select a location");
-    return;
+    recentRides.value = transactions.map((transaction) => ({
+      date: new Date(transaction.created_at).toLocaleString(),
+      from: transaction.admin_transactions.from_loc,
+      to: transaction.admin_transactions.to_loc,
+      status:
+        transaction.isCompleted === null
+          ? "Pending"
+          : transaction.isCompleted
+          ? "Completed"
+          : "Declined", // Adjusted to fit your red/yellow/green status logic
+    }));
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    showToast("An unexpected error occurred. Please try again.", "error");
   }
-
-  terminalLogs.value.push(
-    `Requesting a driver for ${selectedLocation.value}${
-      specificLocation.value ? ` - ${specificLocation.value}` : ""
-    }...`
-  );
-  driverStatus.value = "Finding a driver";
-
-  setTimeout(() => {
-    terminalLogs.value.push("Driver found! ETA: 5 minutes");
-    driverStatus.value = "Driver is on the way";
-  }, 3000);
-
-  setTimeout(() => {
-    terminalLogs.value.push("Driver has arrived at your location");
-    driverStatus.value = "Driver has arrived";
-  }, 8000);
 };
-</script>
 
-<script>
-import Navbar from "@/components/body.vue";
-export default {
-  name: "HomeSection",
-  components: {
-    Navbar,
-  },
+// Fetch requesting rides
+// Fetch requesting rides
+const fetchAllRequestingRides = async () => {
+  try {
+    const { data: transactions, error } = await supabase
+      .from("transactions")
+      .select(
+        `
+        id,
+        created_at,
+        isCompleted,
+        admin_transactions (from_loc, to_loc)
+      `
+      )
+      .is("isCompleted", null) // Fetch only rides with isCompleted = null
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching transactions:", error.message);
+      showToast("Failed to load requesting rides. Please try again.", "error");
+      return;
+    }
+
+    requestingRides.value = transactions.map((transaction) => ({
+      id: transaction.id,
+      date: new Date(transaction.created_at).toLocaleString(),
+      from: transaction.admin_transactions?.from_loc || "N/A",
+      to: transaction.admin_transactions?.to_loc || "N/A",
+      status: "Pending", // Since we are fetching null, status will always be Pending
+    }));
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    showToast("An unexpected error occurred. Please try again.", "error");
+  }
 };
+
+// Accept or Decline Button Logic
+const updateAcceptedStatus = async (transactionId, status) => {
+  try {
+    // Step 1: Update the isCompleted column
+    const { data: updatedTransaction, error: updateError } = await supabase
+      .from("transactions")
+      .update({ isCompleted: status })
+      .eq("id", transactionId)
+      .select();
+
+    if (updateError) {
+      console.error("Error updating accepted status:", updateError.message);
+      showToast("Failed to update status. Please try again.", "error");
+      return;
+    }
+
+    if (!updatedTransaction || updatedTransaction.length === 0) {
+      console.warn("No rows updated. Check if the transactionId matches.");
+      showToast("No matching transaction found to update.", "error");
+      return;
+    }
+
+    // Step 2: Fetch additional details for the log
+    const { data: transactionDetails, error: fetchError } = await supabase
+      .from("transactions")
+      .select(
+        `
+        id,
+        admin_transactions (
+          from_loc,
+          to_loc
+        ),
+        users_transacts:users_transacts_id (
+          description_loc,
+          users_info:users_info_id (
+            fullname,
+            csu_id_number
+          )
+        )
+      `
+      )
+      .eq("id", transactionId)
+      .single();
+
+    if (fetchError) {
+      console.error("Error fetching transaction details:", fetchError.message);
+      showToast("Failed to fetch transaction details. Please try again.", "error");
+      return;
+    }
+
+    // Extract relevant details
+    const {
+      admin_transactions: { from_loc, to_loc },
+      users_transacts: {
+        description_loc,
+        users_info: { fullname: name, csu_id_number },
+      },
+    } = transactionDetails;
+
+    // Step 3: Log the details to terminalLogs
+    terminalLogs.value.push(
+      `Transaction Accepted:
+      - ID: ${transactionId}
+      - From: ${from_loc}
+      - To: ${to_loc}
+      - Description: ${description_loc}
+      - User: ${name} (CSU ID: ${csu_id_number})`
+    );
+
+    // Step 4: Show success toast
+    showToast(`Transaction ${status ? "accepted" : "declined"} successfully.`, "success");
+
+    // Step 5: Refresh the requesting rides list
+    fetchAllRequestingRides();
+  } catch (err) {
+    console.error("Unexpected error updating status:", err);
+    showToast("An unexpected error occurred. Please try again.", "error");
+  }
+};
+
+// Fetch rides on component mount
+fetchAllRecentRides();
+fetchAllRequestingRides();
 </script>
 
 <style scoped>

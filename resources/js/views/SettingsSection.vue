@@ -262,6 +262,18 @@ export default {
     };
   },
   methods: {
+    showToast(message, type) {
+      this.toastMessage = message;
+      this.toastColor =
+        type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white";
+      this.toastVisible = true;
+      setTimeout(() => {
+        this.hideToast();
+      }, 3000);
+    },
+    hideToast() {
+      this.toastVisible = false;
+    },
     validateFullname() {
       try {
         if (!this.newName.trim()) throw new Error("Empty-name");
@@ -352,6 +364,12 @@ export default {
         return false;
       }
     },
+
+    validateOccupation() {
+      // Your validation logic here
+      return this.occupation && this.occupation.trim() !== "";
+    },
+    // Other methods...
 
     async handleSubmit(formType) {
       if (formType === "updateRepeat") {

@@ -1,6 +1,16 @@
 <template>
   <Navbar />
   <div class="leading-normal tracking-normal text-white gradient">
+    <div
+      :class="[
+        'transparency fixed top-5 left-1/2 transform -translate-x-1/2 z-50 p-4 rounded shadow-lg transition-opacity duration-500',
+        toastVisible ? 'opacity-100' : 'opacity-0',
+        toastColor,
+      ]"
+      @transitionend="onTransitionEnd"
+    >
+      <span>{{ toastMessage }}</span>
+    </div>
     <section id="home" class="relative flex items-center justify-center min-h-screen">
       <!-- Background overlay -->
       <div class="absolute inset-0 bg-black bg-opacity-50"></div>
@@ -69,7 +79,7 @@
           <input
             v-model="specificLocation"
             type="text"
-            placeholder="Specific location in CED"
+            placeholder="Specific location"
             class="w-full sm:w-auto px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
           />
         </div>
@@ -91,6 +101,7 @@
 <script setup>
 import { ref, computed } from "vue";
 import { TruckIcon } from "lucide-vue-next";
+import { supabase } from "../supabaseClient"; // supabase link
 
 const terminalLogs = ref([
   "Welcome to Hatid Kita!",
@@ -102,8 +113,9 @@ const driverStatus = ref("Idle");
 const statusColors = {
   Idle: "bg-gray-500",
   "Finding a driver": "bg-yellow-500",
-  "Driver is on the way": "bg-blue-500",
-  "Driver has arrived": "bg-green-500",
+  "Waiting Driver to accept...": "bg-blue-500",
+  "Driver Accepted": "bg-green-500",
+  "Driver Declined": "bg-red-500",
 };
 
 const statusColorClass = computed(() => statusColors[driverStatus.value]);
@@ -126,28 +138,217 @@ const locations = [
   "VILLARES",
 ];
 
-const callDriver = () => {
-  if (!selectedLocation.value || !toLocation.value) {
-    alert("Please select both From and To locations");
+const isCallDriverDisabled = ref(false); // Reactive state to track button disable status
+
+const callDriver = async () => {
+  if (isCallDriverDisabled.value) {
+    showToast("You can only make another request after 5 minutes.", "error");
     return;
   }
 
-  terminalLogs.value.push(
-    `Requesting a driver from ${selectedLocation.value} to ${toLocation.value}${
-      specificLocation.value ? ` - ${specificLocation.value}` : ""
-    }...`
-  );
-  driverStatus.value = "Finding a driver";
+  if (!selectedLocation.value || !toLocation.value) {
+    showToast("Please select both From and To locations.", "error");
+    return;
+  }
 
+  try {
+    // Step 1: Fetch the authenticated user's info
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      console.error("Error fetching authenticated user:", authError?.message);
+      showToast("Failed to identify user. Please log in.", "error");
+      return;
+    }
+
+    const { data: userInfo, error: userInfoError } = await supabase
+      .from("users_info")
+      .select("id")
+      .eq("email", user.email)
+      .single();
+
+    if (userInfoError || !userInfo) {
+      console.error("Error fetching user_info:", userInfoError?.message);
+      showToast("User information not found. Please contact support.", "error");
+      return;
+    }
+
+    const userInfoId = userInfo.id;
+
+    // Step 2: Construct the description including the specific location
+    const description =
+      `${selectedLocation.value} to ${toLocation.value}` +
+      (specificLocation.value ? ` - ${specificLocation.value}` : "");
+
+    // Step 3: Insert into `user_transacts` table
+    const { data: userTransactData, error: userTransactError } = await supabase
+      .from("user_transacts")
+      .insert({
+        description_loc: description,
+        users_info_id: userInfoId,
+      })
+      .select();
+
+    if (userTransactError) {
+      console.error("Error inserting to user_transacts:", userTransactError.message);
+      showToast("Failed to initialize the transaction. Please try again.", "error");
+      return;
+    }
+
+    const userTransactId = userTransactData[0].id;
+
+    // Step 4: Insert into `admin_transactions` table
+    const { data: adminTransactionData, error: adminTransactionError } = await supabase
+      .from("admin_transactions")
+      .insert({
+        from_loc: selectedLocation.value,
+        to_loc: toLocation.value,
+      })
+      .select();
+
+    if (adminTransactionError) {
+      console.error(
+        "Error inserting to admin_transactions:",
+        adminTransactionError.message
+      );
+      showToast("Failed to request a driver. Please try again.", "error");
+      return;
+    }
+
+    const adminTransactionId = adminTransactionData[0].id;
+
+    // Step 5: Insert into `transactions` table
+    const { data: transactionData, error: transactionError } = await supabase
+      .from("transactions")
+      .insert({
+        users_transacts_id: userTransactId,
+        admin_id: adminTransactionId,
+        isCompleted: null, // Default value
+      })
+      .select();
+
+    if (transactionError) {
+      console.error("Error inserting to transactions:", transactionError.message);
+      showToast("Failed to finalize the transaction. Please try again.", "error");
+      return;
+    }
+
+    const transactionId = transactionData[0].id;
+
+    // Step 6: Insert into `admin_dashboard` table
+    const { error: adminDashboardError } = await supabase.from("admin_dashboard").insert({
+      transaction_id: transactionId, // Use the created transaction_id
+    });
+
+    if (adminDashboardError) {
+      console.error("Error inserting to admin_dashboard:", adminDashboardError.message);
+      showToast("Failed to update the admin dashboard. Please contact support.", "error");
+      return;
+    }
+
+    terminalLogs.value.push(
+      `Driver requested from ${selectedLocation.value} to ${toLocation.value}` +
+        (specificLocation.value ? ` - ${specificLocation.value}` : "")
+    );
+
+    driverStatus.value = "Finding a driver";
+
+    // Poll the transaction status until completed
+    const pollTransactionStatus = async () => {
+      try {
+        const { data: updatedTransaction, error: pollError } = await supabase
+          .from("transactions")
+          .select("isCompleted")
+          .eq("id", transactionId)
+          .single();
+
+        if (pollError) {
+          console.error("Error polling transaction status:", pollError.message);
+          return;
+        }
+
+        // Handle case where isCompleted is true (Driver Accepted)
+        if (updatedTransaction?.isCompleted === true) {
+          setTimeout(() => {
+            terminalLogs.value.push("Driver found! ETA: Couple of minutes");
+            driverStatus.value = "Waiting Driver to accept...";
+          }, 3000);
+
+          setTimeout(() => {
+            terminalLogs.value.push("Driver has accepted your request");
+            driverStatus.value = "Driver Accepted";
+          }, 8000);
+
+          return; // Exit the polling
+        }
+
+        // Handle case where isCompleted is false (Driver Declined)
+        if (updatedTransaction?.isCompleted === false) {
+          setTimeout(() => {
+            terminalLogs.value.push("Driver declined your request");
+            driverStatus.value = "Driver Declined";
+            showToast(
+              "Sorry, driver declined your request. You can try again later.",
+              "error"
+            );
+            isCallDriverDisabled.value = false; // Allow a new request
+          }, 3000);
+
+          return; // Exit the polling
+        }
+
+        // Continue polling if isCompleted is null or not set
+        setTimeout(pollTransactionStatus, 3000);
+      } catch (error) {
+        console.error("Unexpected error during polling:", error.message);
+      }
+    };
+
+    pollTransactionStatus();
+
+    // Step 7: Start cooldown timer
+    startCooldown();
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    showToast("An unexpected error occurred. Please try again.", "error");
+  }
+};
+
+// Cooldown logic to prevent repeated requests
+const startCooldown = () => {
+  isCallDriverDisabled.value = true;
+  let remainingTime = 300; // 5 minutes in seconds
+
+  const timer = setInterval(() => {
+    remainingTime--;
+    if (remainingTime === 0) {
+      clearInterval(timer);
+      isCallDriverDisabled.value = false;
+      showToast("You can now make another request.", "success");
+    }
+  }, 1000);
+};
+
+// Toast handling function
+const toastMessage = ref("");
+const toastColor = ref("");
+const toastVisible = ref(false);
+
+const showToast = (message, type) => {
+  toastMessage.value = message;
+  toastColor.value =
+    type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white";
+  toastVisible.value = true;
   setTimeout(() => {
-    terminalLogs.value.push("Driver found! ETA: Couple of minutes");
-    driverStatus.value = "Waiting Driver to accept...";
+    hideToast();
   }, 3000);
+};
 
-  setTimeout(() => {
-    terminalLogs.value.push("Driver has accepted your request");
-    driverStatus.value = "Driver Accepted";
-  }, 8000);
+const hideToast = () => {
+  toastVisible.value = false;
 };
 </script>
 
@@ -157,6 +358,20 @@ export default {
   name: "HomeSection",
   components: {
     Navbar,
+  },
+  methods: {
+    showToast(message, type) {
+      this.toastMessage = message;
+      this.toastColor =
+        type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white";
+      this.toastVisible = true;
+      setTimeout(() => {
+        this.hideToast();
+      }, 3000);
+    },
+    hideToast() {
+      this.toastVisible = false;
+    },
   },
 };
 </script>

@@ -4,6 +4,16 @@
     id="profile"
     class="min-h-screen bg-gradient-to-r from-[#4a0e0e] via-[#3d2617] to-[#5e4d1f] py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center"
   >
+    <div
+      :class="[
+        'transparency fixed top-5 left-1/2 transform -translate-x-1/2 z-50 p-4 rounded shadow-lg transition-opacity duration-500',
+        toastVisible ? 'opacity-100' : 'opacity-0',
+        toastColor,
+      ]"
+      @transitionend="onTransitionEnd"
+    >
+      <span>{{ toastMessage }}</span>
+    </div>
     <div class="max-w-2xl w-full bg-white rounded-xl shadow-2xl overflow-hidden lg:mt-5">
       <div class="bg-gray-100 p-8 relative">
         <!-- Decorative Pattern Background -->
@@ -87,8 +97,18 @@
             >
               <div class="flex justify-between items-center">
                 <span class="text-sm text-gray-600">{{ ride.date }}</span>
-                <span class="text-sm font-medium text-lime-500">{{ ride.status }}</span>
+                <span
+                  class="text-sm font-medium"
+                  :class="{
+                    'text-yellow-500': ride.status === 'Pending',
+                    'text-lime-500': ride.status === 'Completed',
+                    'text-red-500': ride.status === 'Declined',
+                  }"
+                >
+                  {{ ride.status }}
+                </span>
               </div>
+
               <div class="mt-1 text-gray-800 flex items-center">
                 <MapPinIcon class="w-4 h-4 md:w-5 md:h-5 text-black mr-1" />
                 {{ ride.from }}
@@ -127,21 +147,90 @@ const user = ref({
 });
 
 const avatarUrl = ref(null);
+const recentRides = ref([]);
 
-const recentRides = ref([
-  { id: 1, date: "May 15, 2023", from: "CED", to: "HOSTEL", status: "Completed" },
-  { id: 2, date: "May 14, 2023", from: "LIBRARY", to: "CCIS", status: "Completed" },
-  {
-    id: 3,
-    date: "May 13, 2023",
-    from: "NEW ADMIN",
-    to: "KINAADMAN",
-    status: "Completed",
-  },
-  { id: 4, date: "May 14, 2023", from: "LIBRARY", to: "CCIS", status: "Completed" },
-  { id: 5, date: "May 14, 2023", from: "LIBRARY", to: "CCIS", status: "Completed" },
-]);
+const fetchUserTransactions = async () => {
+  try {
+    // Step 1: Get the logged-in user's UUID
+    const {
+      data: { user: loggedInUser },
+      error: authError,
+    } = await supabase.auth.getUser();
 
+    if (authError || !loggedInUser) {
+      console.error("Error fetching authenticated user:", authError?.message);
+      showToast("Failed to identify user. Please log in.", "error");
+      return;
+    }
+
+    // Step 2: Fetch the UUID from the `users_info` table
+    const { data: userInfo, error: userInfoError } = await supabase
+      .from("users_info")
+      .select("id")
+      .eq("email", loggedInUser.email)
+      .single();
+
+    if (userInfoError || !userInfo) {
+      console.error("Error fetching user_info:", userInfoError?.message);
+      showToast("User information not found. Please contact support.", "error");
+      return;
+    }
+
+    const userInfoId = userInfo.id; // UUID of the user
+
+    // Step 3: Fetch all matching user_transacts
+    const { data: userTransacts, error: userTransactError } = await supabase
+      .from("user_transacts")
+      .select("id")
+      .eq("users_info_id", userInfoId);
+
+    if (userTransactError || !userTransacts || userTransacts.length === 0) {
+      console.error("Error fetching user_transacts:", userTransactError?.message);
+      showToast("User transactions not found. Please contact support.", "error");
+      return;
+    }
+
+    const userTransactIds = userTransacts.map((transact) => transact.id); // Collect IDs
+
+    // Step 4: Fetch transactions for the user
+    const { data: transactions, error: transactionError } = await supabase
+      .from("transactions")
+      .select(
+        `
+        created_at,
+        isCompleted,
+        admin_transactions (from_loc, to_loc)
+      `
+      )
+      .in("users_transacts_id", userTransactIds) // Use the array of IDs
+      .order("created_at", { ascending: false });
+
+    if (transactionError) {
+      console.error("Error fetching transactions:", transactionError.message);
+      showToast("Failed to load recent rides. Please try again.", "error");
+      return;
+    }
+
+    // Format data for display
+    recentRides.value = transactions.map((transaction) => ({
+      date: new Date(transaction.created_at).toLocaleString(),
+      from: transaction.admin_transactions.from_loc,
+      to: transaction.admin_transactions.to_loc,
+      status:
+        transaction.isCompleted === null
+          ? "Pending"
+          : transaction.isCompleted
+          ? "Completed"
+          : "Declined", // Adjusted to fit your red/yellow/green status logic
+    }));
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    showToast("An unexpected error occurred. Please try again.", "error");
+  }
+};
+
+// Fetch data on component mount
+onMounted(fetchUserTransactions);
 // Function to fetch user details
 async function fetchUserDetails() {
   try {
@@ -193,6 +282,30 @@ async function fetchUserDetails() {
 onMounted(() => {
   fetchUserDetails();
 });
+</script>
+
+<script>
+import Navbar from "@/components/body.vue";
+export default {
+  name: "ProfileSection",
+  components: {
+    Navbar,
+  },
+  methods: {
+    showToast(message, type) {
+      this.toastMessage = message;
+      this.toastColor =
+        type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white";
+      this.toastVisible = true;
+      setTimeout(() => {
+        this.hideToast();
+      }, 3000);
+    },
+    hideToast() {
+      this.toastVisible = false;
+    },
+  },
+};
 </script>
 
 <style scoped>
