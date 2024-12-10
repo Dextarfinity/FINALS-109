@@ -510,7 +510,7 @@ const avatars = ref([
   avatar9,
 ]);
 
-const avatarUrl = ref(null); // Reactive state for the selected avatar
+const avatarUrl = ref(avatar1); // Reactive state for the selected avatar
 
 // Function to save selected avatar in localStorage
 const saveAvatarToLocalStorage = (avatar) => {

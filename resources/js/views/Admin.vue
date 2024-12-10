@@ -1,5 +1,6 @@
 <template>
   <Navbar />
+
   <div class="leading-normal tracking-normal text-white gradient">
     <div
       :class="[

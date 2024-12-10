@@ -367,14 +367,21 @@ export default {
         // Ensure session is available and store the access token
         const session = data?.session;
         if (session && session.access_token) {
+          // Store the access token in local storage for authenticated requests
           localStorage.setItem("access_token", session.access_token);
+
+          // Show a success message
           this.showToast("Google login successful!", "success");
-          this.$router.push("/homesec"); // Redirect to homesec after successful login
+
+          // Redirect to the desired page
+          this.$router.push("/homesec");
         } else {
           throw new Error("No session or access token found.");
         }
       } catch (error) {
-        this.showToast("Google login error", error);
+        // Handle any errors in the login process
+        console.error("Google login error:", error);
+        this.showToast("Google login error", "error");
       }
     },
     //for validations of input
