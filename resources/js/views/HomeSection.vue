@@ -97,7 +97,6 @@
     </section>
   </div>
 </template>
-
 <script setup>
 import { ref, computed } from "vue";
 import { TruckIcon } from "lucide-vue-next";
@@ -141,6 +140,7 @@ const locations = [
 const isCallDriverDisabled = ref(false); // Reactive state to track button disable status
 
 const callDriver = async () => {
+  // Check for cooldown before making a request
   if (isCallDriverDisabled.value) {
     showToast("You can only make another request after 5 minutes.", "error");
     return;
@@ -164,9 +164,10 @@ const callDriver = async () => {
       return;
     }
 
+    // Step 2: Fetch the user's info from the `users_info` table
     const { data: userInfo, error: userInfoError } = await supabase
       .from("users_info")
-      .select("id")
+      .select("id, csu_id_number, carsu_email")
       .eq("email", user.email)
       .single();
 
@@ -176,14 +177,23 @@ const callDriver = async () => {
       return;
     }
 
-    const userInfoId = userInfo.id;
+    // Step 3: Check if `csu_id_number` or `carsu_email` is null
+    const { csu_id_number, carsu_email, id: userInfoId } = userInfo;
 
-    // Step 2: Construct the description including the specific location
+    if (!csu_id_number || !carsu_email) {
+      showToast(
+        "Your account is incomplete. Please update your CSU ID number and CARSU email to proceed.",
+        "error"
+      );
+      return;
+    }
+
+    // Step 4: Construct the description including the specific location
     const description =
       `${selectedLocation.value} to ${toLocation.value}` +
       (specificLocation.value ? ` - ${specificLocation.value}` : "");
 
-    // Step 3: Insert into `user_transacts` table
+    // Step 5: Insert into `user_transacts` table
     const { data: userTransactData, error: userTransactError } = await supabase
       .from("user_transacts")
       .insert({
@@ -200,7 +210,7 @@ const callDriver = async () => {
 
     const userTransactId = userTransactData[0].id;
 
-    // Step 4: Insert into `admin_transactions` table
+    // Step 6: Insert into `admin_transactions` table
     const { data: adminTransactionData, error: adminTransactionError } = await supabase
       .from("admin_transactions")
       .insert({
@@ -220,7 +230,7 @@ const callDriver = async () => {
 
     const adminTransactionId = adminTransactionData[0].id;
 
-    // Step 5: Insert into `transactions` table
+    // Step 7: Insert into `transactions` table
     const { data: transactionData, error: transactionError } = await supabase
       .from("transactions")
       .insert({
@@ -238,7 +248,7 @@ const callDriver = async () => {
 
     const transactionId = transactionData[0].id;
 
-    // Step 6: Insert into `admin_dashboard` table
+    // Step 8: Insert into `admin_dashboard` table
     const { error: adminDashboardError } = await supabase.from("admin_dashboard").insert({
       transaction_id: transactionId, // Use the created transaction_id
     });
@@ -270,7 +280,6 @@ const callDriver = async () => {
           return;
         }
 
-        // Handle case where isCompleted is true (Driver Accepted)
         if (updatedTransaction?.isCompleted === true) {
           setTimeout(() => {
             terminalLogs.value.push("Driver found! ETA: Couple of minutes");
@@ -278,14 +287,15 @@ const callDriver = async () => {
           }, 3000);
 
           setTimeout(() => {
-            terminalLogs.value.push("Driver has accepted your request");
+            terminalLogs.value.push(
+              "Driver has accepted your request. Please stay where you are to help drivers not having difficulties finding you! Thank you for your patience!"
+            );
             driverStatus.value = "Driver Accepted";
           }, 8000);
 
           return; // Exit the polling
         }
 
-        // Handle case where isCompleted is false (Driver Declined)
         if (updatedTransaction?.isCompleted === false) {
           setTimeout(() => {
             terminalLogs.value.push("Driver declined your request");
@@ -294,13 +304,12 @@ const callDriver = async () => {
               "Sorry, driver declined your request. You can try again later.",
               "error"
             );
-            isCallDriverDisabled.value = false; // Allow a new request
+            isCallDriverDisabled.value = false;
           }, 3000);
 
           return; // Exit the polling
         }
 
-        // Continue polling if isCompleted is null or not set
         setTimeout(pollTransactionStatus, 3000);
       } catch (error) {
         console.error("Unexpected error during polling:", error.message);
@@ -309,7 +318,7 @@ const callDriver = async () => {
 
     pollTransactionStatus();
 
-    // Step 7: Start cooldown timer
+    // Step 9: Start cooldown timer
     startCooldown();
   } catch (err) {
     console.error("Unexpected error:", err);
@@ -317,20 +326,54 @@ const callDriver = async () => {
   }
 };
 
-// Cooldown logic to prevent repeated requests
+// Cooldown logic with persistence using localStorage
 const startCooldown = () => {
+  const cooldownDuration = 300; // 5 minutes in seconds
+  const cooldownEndTime = Date.now() + cooldownDuration * 1000;
+  localStorage.setItem("cooldownEndTime", cooldownEndTime);
+
   isCallDriverDisabled.value = true;
-  let remainingTime = 300; // 5 minutes in seconds
 
   const timer = setInterval(() => {
-    remainingTime--;
-    if (remainingTime === 0) {
+    const remainingTime = Math.ceil((cooldownEndTime - Date.now()) / 1000);
+
+    if (remainingTime <= 0) {
       clearInterval(timer);
       isCallDriverDisabled.value = false;
+      localStorage.removeItem("cooldownEndTime");
       showToast("You can now make another request.", "success");
     }
   }, 1000);
 };
+
+// Check for active cooldown on page load
+const checkCooldown = () => {
+  const cooldownEndTime = localStorage.getItem("cooldownEndTime");
+
+  if (cooldownEndTime) {
+    const remainingTime = Math.ceil((cooldownEndTime - Date.now()) / 1000);
+
+    if (remainingTime > 0) {
+      isCallDriverDisabled.value = true;
+
+      const timer = setInterval(() => {
+        const timeLeft = Math.ceil((cooldownEndTime - Date.now()) / 1000);
+
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          isCallDriverDisabled.value = false;
+          localStorage.removeItem("cooldownEndTime");
+          showToast("You can now make another request.", "success");
+        }
+      }, 1000);
+    } else {
+      localStorage.removeItem("cooldownEndTime");
+    }
+  }
+};
+
+// Initialize cooldown check on script load
+checkCooldown();
 
 // Toast handling function
 const toastMessage = ref("");

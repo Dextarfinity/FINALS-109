@@ -4,6 +4,16 @@
     id="settings"
     class="min-h-screen bg-gradient-to-r from-[#4a0e0e] via-[#3d2617] to-[#5e4d1f] py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center"
   >
+    <div
+      :class="[
+        'transparency fixed top-5 left-1/2 transform -translate-x-1/2 z-50 p-4 rounded shadow-lg transition-opacity duration-500',
+        toastVisible ? 'opacity-100' : 'opacity-0',
+        toastColor,
+      ]"
+      @transitionend="onTransitionEnd"
+    >
+      <span>{{ toastMessage }}</span>
+    </div>
     <div class="max-w-2xl w-full bg-white rounded-xl shadow-2xl overflow-hidden lg:mt-5">
       <form @submit.prevent="updateUserInfo">
         <div class="bg-gray-100 p-8 relative">
@@ -152,7 +162,7 @@
             </div>
 
             <!-- Avatar Selector -->
-            <div class="mb-6">
+            <div class="">
               <h4 class="text-lg font-semibold text-gray-800 mb-2">Choose an Avatar</h4>
               <div class="grid grid-cols-3 sm:grid-cols-4 gap-4">
                 <div v-for="(avatar, index) in avatars" :key="index" class="relative">
@@ -167,18 +177,7 @@
             </div>
           </div>
         </div>
-        <div class="p-6">
-          <button
-            type="submit"
-            class="w-full py-2 px-4 bg-black hover:bg-orange-950 rounded-md shadow-lg text-white font-semibold transition duration-200"
-          >
-            Save Changes
-          </button>
-        </div>
       </form>
-      <div class="p-6">
-        <hr />
-      </div>
 
       <div class="sm:p-8">
         <form @submit.prevent="updatePassword" class="space-y-6">
@@ -470,14 +469,12 @@ export default {
   },
 };
 </script>
-
 <script setup>
 import { supabase } from "../supabaseClient";
 import { ref, onMounted } from "vue";
 import { MailIcon, PhoneIcon, LockIcon, Hash, Briefcase, User } from "lucide-vue-next";
 import Navbar from "@/components/body.vue";
 
-// Components declaration should be inside <script setup>
 defineProps({
   components: { Navbar },
 });
@@ -490,7 +487,66 @@ const userData = ref({
   occupation: null,
 });
 
-// Function to fetch user details
+// Avatar URLs using imported images
+import avatar1 from "./images/avatars/avatar1.png";
+import avatar2 from "./images/avatars/avatar2.png";
+import avatar3 from "./images/avatars/avatar3.png";
+import avatar4 from "./images/avatars/avatar4.png";
+import avatar5 from "./images/avatars/avatar5.png";
+import avatar6 from "./images/avatars/avatar6.png";
+import avatar7 from "./images/avatars/avatar7.png";
+import avatar8 from "./images/avatars/avatar8.png";
+import avatar9 from "./images/avatars/avatar9.png";
+
+const avatars = ref([
+  avatar1,
+  avatar2,
+  avatar3,
+  avatar4,
+  avatar5,
+  avatar6,
+  avatar7,
+  avatar8,
+  avatar9,
+]);
+
+const avatarUrl = ref(null); // Reactive state for the selected avatar
+
+// Function to save selected avatar in localStorage
+const saveAvatarToLocalStorage = (avatar) => {
+  localStorage.setItem("selectedAvatar", avatar);
+};
+
+// Function to display toast messages
+const showToast = (message, type = "success") => {
+  const toast = document.createElement("div");
+  toast.textContent = message;
+  toast.className = `fixed bottom-4 right-4 bg-${
+    type === "success" ? "green" : "red"
+  }-500 text-white px-4 py-2 rounded shadow-md transition-opacity duration-300`;
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    setTimeout(() => toast.remove(), 300); // Remove element after fading
+  }, 3000);
+};
+
+// Function to load the avatar from localStorage on mount
+const loadAvatarFromLocalStorage = () => {
+  const savedAvatar = localStorage.getItem("selectedAvatar");
+  if (savedAvatar) {
+    avatarUrl.value = savedAvatar;
+  }
+};
+
+// Function to handle avatar selection
+const selectAvatar = (avatar) => {
+  avatarUrl.value = avatar;
+  saveAvatarToLocalStorage(avatar);
+  showToast("Avatar updated successfully!", "success"); // Show toast on save
+};
+
+// Fetch user details when the component is mounted
 async function fetchUserDetails() {
   try {
     const {
@@ -520,10 +576,9 @@ async function fetchUserDetails() {
     }
 
     if (data) {
-      // Update user information
       userData.value = {
-        fullName: data.fullname, // Assuming "fullname" is a single property
-        phoneNumber: data.phone_number, // Assuming "phone_number" contains the phone
+        fullName: data.fullname,
+        phoneNumber: data.phone_number,
         carsuEmail: data.carsu_email,
         csuIdNumber: data.csu_id_number,
         occupation: data.occupation,
@@ -536,35 +591,9 @@ async function fetchUserDetails() {
   }
 }
 
-// Call the function when the component is mounted
+// Initialize avatar selection and user data on mount
 onMounted(() => {
+  loadAvatarFromLocalStorage();
   fetchUserDetails();
 });
-
-// Directly importing avatar images
-import avatar1 from "./images/avatars/avatar1.png";
-import avatar2 from "./images/avatars/avatar2.png";
-import avatar3 from "./images/avatars/avatar3.png";
-import avatar4 from "./images/avatars/avatar4.png";
-import avatar5 from "./images/avatars/avatar5.png";
-import avatar6 from "./images/avatars/avatar6.png";
-import avatar7 from "./images/avatars/avatar7.png";
-import avatar8 from "./images/avatars/avatar8.png";
-import avatar9 from "./images/avatars/avatar9.png";
-
-// Avatar URLs, using imported images
-const avatars = ref([
-  avatar1,
-  avatar2,
-  avatar3,
-  avatar4,
-  avatar5,
-  avatar6,
-  avatar7,
-  avatar8,
-  avatar9,
-]);
-
-// Default avatar selection
-const avatarUrl = ref(null);
 </script>

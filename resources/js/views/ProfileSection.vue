@@ -136,6 +136,24 @@ import {
 } from "lucide-vue-next";
 import Navbar from "@/components/body.vue"; // Import Navbar from components
 
+// Toast handling function
+const toastMessage = ref("");
+const toastColor = ref("");
+const toastVisible = ref(false);
+
+const showToast = (message, type) => {
+  toastMessage.value = message;
+  toastColor.value =
+    type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white";
+  toastVisible.value = true;
+  setTimeout(() => {
+    hideToast();
+  }, 3000);
+};
+
+const hideToast = () => {
+  toastVisible.value = false;
+};
 // Reactive data for the user and UI
 const user = ref({
   name: "",
@@ -148,6 +166,19 @@ const user = ref({
 
 const avatarUrl = ref(null);
 const recentRides = ref([]);
+
+// Load avatar from localStorage
+function fetchAvatarUrl() {
+  const storedAvatar = localStorage.getItem("selectedAvatar");
+  avatarUrl.value = storedAvatar || "/placeholder.svg?height=128&width=128"; // Default to placeholder
+}
+
+// Fetch user details and transactions on mount
+onMounted(() => {
+  fetchAvatarUrl();
+  fetchUserDetails();
+  fetchUserTransactions();
+});
 
 const fetchUserTransactions = async () => {
   try {

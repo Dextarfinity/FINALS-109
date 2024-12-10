@@ -1,4 +1,5 @@
 <template>
+  <Navbar />
   <div class="leading-normal tracking-normal text-white gradient">
     <div
       :class="[
@@ -64,12 +65,21 @@
             >
               <div class="p-6 lg:p-8">
                 <div>
-                  <h4
-                    class="text-lg md:text-xl font-semibold text-gray-800 mb-4 flex items-center animate-fade-in"
-                  >
-                    <Clock class="w-5 h-5 md:w-6 md:h-6 text-black mr-2" />
-                    Requesting Rides
-                  </h4>
+                  <div class="flex items-center justify-between mb-4 animate-fade-in">
+                    <h4
+                      class="text-lg md:text-xl font-semibold text-gray-800 flex items-center"
+                    >
+                      <Clock class="w-5 h-5 md:w-6 md:h-6 text-black mr-2" />
+                      Requesting Rides
+                    </h4>
+                    <button
+                      @click="refreshRequestRides"
+                      class="bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition duration-300"
+                      title="Refresh"
+                    >
+                      <RotateCcw class="w-4 h-4 md:w-4 md:h-4 text-black" />
+                    </button>
+                  </div>
                   <ul
                     v-if="requestingRides && requestingRides.length > 0"
                     class="space-y-2 md:space-y-3 overflow-y-auto max-h-28 md:max-h-32 animate-fade-in"
@@ -84,7 +94,6 @@
                           ride.date
                         }}</span>
                         <div class="flex items-center space-x-2">
-                          <!-- Accept Button (Check Icon) -->
                           <!-- Accept Button -->
                           <button
                             @click="updateAcceptedStatus(ride.id, true)"
@@ -121,12 +130,21 @@
             >
               <div class="p-6 lg:p-8">
                 <div>
-                  <h4
-                    class="text-lg md:text-xl font-semibold text-gray-800 mb-4 flex items-center"
-                  >
-                    <ClockIcon class="w-5 h-5 md:w-6 md:h-6 text-black mr-2" />
-                    Recent Rides
-                  </h4>
+                  <div class="flex items-center justify-between mb-4">
+                    <h4
+                      class="text-lg md:text-xl font-semibold text-gray-800 flex items-center"
+                    >
+                      <ClockIcon class="w-5 h-5 md:w-6 md:h-6 text-black mr-2" />
+                      Recent Rides
+                    </h4>
+                    <button
+                      @click="refreshRecentRides"
+                      class="bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition duration-300"
+                      title="Refresh"
+                    >
+                      <RotateCcw class="w-4 h-4 md:w-4 md:h-4 text-black" />
+                    </button>
+                  </div>
                   <ul class="space-y-3 overflow-y-auto max-h-32">
                     <template v-if="recentRides.length > 0">
                       <li
@@ -147,7 +165,6 @@
                             {{ ride.status }}
                           </span>
                         </div>
-
                         <div class="mt-1 text-gray-800 flex items-center">
                           <MapPinIcon class="w-4 h-4 md:w-5 md:h-5 text-black mr-1" />
                           {{ ride.from }}
@@ -170,9 +187,19 @@
   </div>
 </template>
 
+<script>
+import Navbar from "@/components/logoutadmin.vue";
+export default {
+  name: "AdminSection",
+  components: {
+    Navbar,
+  },
+};
+</script>
+
 <script setup>
 import { supabase } from "../supabaseClient";
-import { ref } from "vue"; // Import ref from Vue
+import { ref } from "vue";
 import {
   Check,
   Ban,
@@ -182,12 +209,15 @@ import {
   ClockIcon,
   MapPinIcon,
   ArrowRightIcon,
+  RotateCcw,
 } from "lucide-vue-next";
 
+// Toast variables
 const toastMessage = ref("");
 const toastColor = ref("");
 const toastVisible = ref(false);
 
+// Show and hide toast messages
 const showToast = (message, type) => {
   toastMessage.value = message;
   toastColor.value =
@@ -195,16 +225,11 @@ const showToast = (message, type) => {
   toastVisible.value = true;
 
   setTimeout(() => {
-    hideToast();
+    toastVisible.value = false;
   }, 3000);
 };
 
-const hideToast = () => {
-  toastVisible.value = false;
-};
-
 // Reactive variables
-const avatarUrl = ref(null);
 const terminalLogs = ref([
   "Welcome to Hatid Kita!",
   "System initialized...",
@@ -229,30 +254,26 @@ const fetchAllRecentRides = async () => {
       )
       .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("Error fetching transactions:", error.message);
-      showToast("Failed to load recent rides. Please try again.", "error");
-      return;
-    }
+    if (error) throw new Error(error.message);
 
     recentRides.value = transactions.map((transaction) => ({
       date: new Date(transaction.created_at).toLocaleString(),
-      from: transaction.admin_transactions.from_loc,
-      to: transaction.admin_transactions.to_loc,
+      from: transaction.admin_transactions?.from_loc || "N/A",
+      to: transaction.admin_transactions?.to_loc || "N/A",
       status:
         transaction.isCompleted === null
           ? "Pending"
           : transaction.isCompleted
           ? "Completed"
-          : "Declined", // Adjusted to fit your red/yellow/green status logic
+          : "Declined",
     }));
+    showToast("Recent rides refreshed successfully.", "success");
   } catch (err) {
-    console.error("Unexpected error:", err);
-    showToast("An unexpected error occurred. Please try again.", "error");
+    console.error("Error fetching recent rides:", err);
+    showToast("Failed to load recent rides. Please try again.", "error");
   }
 };
 
-// Fetch requesting rides
 // Fetch requesting rides
 const fetchAllRequestingRides = async () => {
   try {
@@ -266,50 +287,43 @@ const fetchAllRequestingRides = async () => {
         admin_transactions (from_loc, to_loc)
       `
       )
-      .is("isCompleted", null) // Fetch only rides with isCompleted = null
+      .is("isCompleted", null) // Only fetch pending rides
       .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("Error fetching transactions:", error.message);
-      showToast("Failed to load requesting rides. Please try again.", "error");
-      return;
-    }
+    if (error) throw new Error(error.message);
 
     requestingRides.value = transactions.map((transaction) => ({
       id: transaction.id,
       date: new Date(transaction.created_at).toLocaleString(),
       from: transaction.admin_transactions?.from_loc || "N/A",
       to: transaction.admin_transactions?.to_loc || "N/A",
-      status: "Pending", // Since we are fetching null, status will always be Pending
+      status: "Pending",
     }));
+    showToast("Requesting rides refreshed successfully.", "success");
   } catch (err) {
-    console.error("Unexpected error:", err);
-    showToast("An unexpected error occurred. Please try again.", "error");
+    console.error("Error fetching requesting rides:", err);
+    showToast("Failed to load requesting rides. Please try again.", "error");
   }
 };
 
-// Accept or Decline Button Logic
+// Refresh button handlers
+const refreshRecentRides = () => {
+  fetchAllRecentRides();
+};
+
+const refreshRequestRides = () => {
+  fetchAllRequestingRides();
+};
+
+// Update the status of a ride (accept or decline)
 const updateAcceptedStatus = async (transactionId, status) => {
   try {
-    // Step 1: Update the isCompleted column
-    const { data: updatedTransaction, error: updateError } = await supabase
+    const { error: updateError } = await supabase
       .from("transactions")
       .update({ isCompleted: status })
-      .eq("id", transactionId)
-      .select();
+      .eq("id", transactionId);
 
-    if (updateError) {
-      console.error("Error updating accepted status:", updateError.message);
-      showToast("Failed to update status. Please try again.", "error");
-      return;
-    }
-
-    if (!updatedTransaction || updatedTransaction.length === 0) {
-      console.warn("No rows updated. Check if the transactionId matches.");
-      showToast("No matching transaction found to update.", "error");
-      return;
-    }
-
+    if (updateError) throw new Error(updateError.message);
     // Step 2: Fetch additional details for the log
     const { data: transactionDetails, error: fetchError } = await supabase
       .from("transactions")
@@ -346,7 +360,6 @@ const updateAcceptedStatus = async (transactionId, status) => {
         users_info: { fullname: name, csu_id_number },
       },
     } = transactionDetails;
-
     // Step 3: Log the details to terminalLogs
     terminalLogs.value.push(
       `Transaction Accepted:
@@ -357,14 +370,11 @@ const updateAcceptedStatus = async (transactionId, status) => {
       - User: ${name} (CSU ID: ${csu_id_number})`
     );
 
-    // Step 4: Show success toast
-    showToast(`Transaction ${status ? "accepted" : "declined"} successfully.`, "success");
-
-    // Step 5: Refresh the requesting rides list
     fetchAllRequestingRides();
+    showToast(`Transaction ${status ? "accepted" : "declined"} successfully.`, "success");
   } catch (err) {
-    console.error("Unexpected error updating status:", err);
-    showToast("An unexpected error occurred. Please try again.", "error");
+    console.error("Error updating status:", err);
+    showToast("Failed to update transaction status. Please try again.", "error");
   }
 };
 

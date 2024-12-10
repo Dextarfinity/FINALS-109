@@ -355,7 +355,6 @@ export default {
     hideToast() {
       this.toastVisible = false;
     },
-
     // Google login function
     async handleGoogleSignIn() {
       try {
@@ -375,7 +374,7 @@ export default {
           throw new Error("No session or access token found.");
         }
       } catch (error) {
-        this.showToast(`Google login error: ${error.message}`, "error");
+        this.showToast("Google login error", error);
       }
     },
     //for validations of input
