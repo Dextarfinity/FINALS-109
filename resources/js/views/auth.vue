@@ -1,5 +1,6 @@
 <template>
-  <svg
+  <div class="relative w-full h-screen overflow-hidden">
+    <svg
     viewBox="0 0 1428 174"
     version="1.1"
     xmlns="http://www.w3.org/2000/svg"
@@ -306,6 +307,8 @@
       </div>
     </div>
   </div>
+  </div>
+ 
 </template>
 
 <script>
