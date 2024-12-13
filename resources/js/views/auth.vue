@@ -117,7 +117,7 @@
                 />
                 <span class="ml-2 buttontext">Remember me</span>
               </label>
-              <a class="text-sm text-black hover:underline buttontext" href="#"
+              <a class="text-sm text-black hover:underline buttontext" href="/forgotpass"
                 >Forgot your password?</a
               >
             </div>
