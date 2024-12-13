@@ -355,7 +355,6 @@ export default {
     hideToast() {
       this.toastVisible = false;
     },
-    // Google login function
     async handleGoogleSignIn() {
       try {
         const { data, error } = await supabase.auth.signInWithOAuth({
@@ -364,22 +363,55 @@ export default {
 
         if (error) throw error;
 
-        // Ensure session is available and store the access token
         const session = data?.session;
         if (session && session.access_token) {
-          // Store the access token in local storage for authenticated requests
           localStorage.setItem("access_token", session.access_token);
-
-          // Show a success message
           this.showToast("Google login successful!", "success");
 
-          // Redirect to the desired page
+          // Fetch user details from `auth.users`
+          const { data: userData, error: userError } = await supabase.auth.getUser();
+          if (userError) throw userError;
+
+          const userId = userData?.user?.id; // Auth user ID (UUID)
+          const email = userData?.user?.email; // Email
+          const metadata =
+            userData?.user?.user_metadata || userData?.user?.raw_user_meta_data;
+          const fullName = metadata?.name || metadata?.full_name || "Unknown User";
+
+          // Check if the user exists in `users_info`
+          const { data: existingUser, error: fetchError } = await supabase
+            .from("users_info")
+            .select("*")
+            .eq("id", userId)
+            .single();
+
+          if (fetchError || !existingUser) {
+            // Insert new user into `users_info`
+            const { error: insertError } = await supabase.from("users_info").insert([
+              {
+                id: userId, // UUID from auth.users
+                email: email, // Email from auth.users
+                fullname: fullName, // Full name from metadata
+                info_updated: true, // Metadata is updated
+              },
+            ]);
+
+            if (insertError) {
+              console.error("Error inserting user into users_info:", insertError);
+              throw new Error("Failed to insert user into users_info");
+            }
+
+            console.log("User successfully inserted into users_info.");
+          } else {
+            console.log("User already exists in users_info:", existingUser);
+          }
+
+          // Redirect to the home page
           this.$router.push("/homesec");
         } else {
           throw new Error("No session or access token found.");
         }
       } catch (error) {
-        // Handle any errors in the login process
         console.error("Google login error:", error);
         this.showToast("Google login error", "error");
       }
