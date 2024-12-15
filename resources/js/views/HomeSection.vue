@@ -11,7 +11,10 @@
     >
       <span>{{ toastMessage }}</span>
     </div>
-    <section id="home" class="relative flex items-center justify-center min-h-screen">
+    <section
+      id="home"
+      class="relative flex items-center justify-center min-h-screen"
+    >
       <!-- Background overlay -->
       <div class="absolute inset-0 bg-black bg-opacity-50"></div>
 
@@ -59,7 +62,11 @@
             class="w-full sm:w-auto px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
           >
             <option value="">From: Select Location</option>
-            <option v-for="location in locations" :key="location" :value="location">
+            <option
+              v-for="location in locations"
+              :key="location"
+              :value="location"
+            >
               {{ location }}
             </option>
           </select>
@@ -70,7 +77,11 @@
             class="w-full sm:w-auto px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
           >
             <option value="">To: Select Location</option>
-            <option v-for="location in locations" :key="location" :value="location">
+            <option
+              v-for="location in locations"
+              :key="location"
+              :value="location"
+            >
               {{ location }}
             </option>
           </select>
@@ -203,21 +214,28 @@ const callDriver = async () => {
       .select();
 
     if (userTransactError) {
-      console.error("Error inserting to user_transacts:", userTransactError.message);
-      showToast("Failed to initialize the transaction. Please try again.", "error");
+      console.error(
+        "Error inserting to user_transacts:",
+        userTransactError.message
+      );
+      showToast(
+        "Failed to initialize the transaction. Please try again.",
+        "error"
+      );
       return;
     }
 
     const userTransactId = userTransactData[0].id;
 
     // Step 6: Insert into `admin_transactions` table
-    const { data: adminTransactionData, error: adminTransactionError } = await supabase
-      .from("admin_transactions")
-      .insert({
-        from_loc: selectedLocation.value,
-        to_loc: toLocation.value,
-      })
-      .select();
+    const { data: adminTransactionData, error: adminTransactionError } =
+      await supabase
+        .from("admin_transactions")
+        .insert({
+          from_loc: selectedLocation.value,
+          to_loc: toLocation.value,
+        })
+        .select();
 
     if (adminTransactionError) {
       console.error(
@@ -241,21 +259,35 @@ const callDriver = async () => {
       .select();
 
     if (transactionError) {
-      console.error("Error inserting to transactions:", transactionError.message);
-      showToast("Failed to finalize the transaction. Please try again.", "error");
+      console.error(
+        "Error inserting to transactions:",
+        transactionError.message
+      );
+      showToast(
+        "Failed to finalize the transaction. Please try again.",
+        "error"
+      );
       return;
     }
 
     const transactionId = transactionData[0].id;
 
     // Step 8: Insert into `admin_dashboard` table
-    const { error: adminDashboardError } = await supabase.from("admin_dashboard").insert({
-      transaction_id: transactionId, // Use the created transaction_id
-    });
+    const { error: adminDashboardError } = await supabase
+      .from("admin_dashboard")
+      .insert({
+        transaction_id: transactionId, // Use the created transaction_id
+      });
 
     if (adminDashboardError) {
-      console.error("Error inserting to admin_dashboard:", adminDashboardError.message);
-      showToast("Failed to update the admin dashboard. Please contact support.", "error");
+      console.error(
+        "Error inserting to admin_dashboard:",
+        adminDashboardError.message
+      );
+      showToast(
+        "Failed to update the admin dashboard. Please contact support.",
+        "error"
+      );
       return;
     }
 
@@ -397,8 +429,9 @@ const hideToast = () => {
 
 <script>
 import Navbar from "@/components/body.vue";
+
 export default {
-  name: "HomeSection",
+  name: "Home",
   components: {
     Navbar,
   },
@@ -406,7 +439,9 @@ export default {
     showToast(message, type) {
       this.toastMessage = message;
       this.toastColor =
-        type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white";
+        type === "success"
+          ? "bg-green-500 text-white"
+          : "bg-red-500 text-white";
       this.toastVisible = true;
       setTimeout(() => {
         this.hideToast();

@@ -27,7 +27,9 @@
             class="bg-white rounded-lg shadow-md p-6 transition-all duration-300 hover:shadow-xl animate-fade-in"
             :style="{ animationDelay: `${index * 150}ms` }"
           >
-            <h3 class="text-xl font-semibold mb-2 text-gray-800">{{ faq.question }}</h3>
+            <h3 class="text-xl font-semibold mb-2 text-gray-800">
+              {{ faq.question }}
+            </h3>
             <p class="text-gray-600">{{ faq.answer }}</p>
           </div>
         </div>
@@ -36,11 +38,15 @@
       <!-- Bottom Contact Section -->
       <div class="container mx-auto text-center lg:py-6" style="z-index: 2">
         <div class="container max-w-5xl mx-auto m-4">
-          <h2 class="w-full my-2 text-4xl font-bold leading-tight text-center text-white">
+          <h2
+            class="w-full my-2 text-4xl font-bold leading-tight text-center text-white"
+          >
             For more questions and inquiries. Feel free to email us!
           </h2>
           <div class="w-full mb-6">
-            <div class="mx-auto bg-white w-1/6 opacity-25 my-0 py-0 rounded-t"></div>
+            <div
+              class="mx-auto bg-white w-1/6 opacity-25 my-0 py-0 rounded-t"
+            ></div>
           </div>
           <div class="flex flex-wrap">
             <!-- Right Column: Contact Form -->
@@ -49,7 +55,9 @@
                 <div class="w-full max-w-md bg-white rounded-lg shadow-md p-6">
                   <h2 class="text-2xl font-bold text-gray-800">Message Us!</h2>
                   <div class="w-full mb-4">
-                    <div class="h-1 mx-auto gradient w-4/6 my-0 py-0 rounded-t"></div>
+                    <div
+                      class="h-1 mx-auto gradient w-4/6 my-0 py-0 rounded-t"
+                    ></div>
                   </div>
 
                   <!-- Contact Form -->
@@ -116,10 +124,14 @@ const faqs = [
 <script>
 import Navbar from "@/components/body.vue";
 export default {
-  name: "FAQsSection",
+  name: "faq",
   components: {
     Navbar,
   },
+  methods: {},
+  // mounted() {
+  //   this.checkTokenExpiration();
+  // },
 };
 </script>
 

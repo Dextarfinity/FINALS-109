@@ -11,136 +11,81 @@ import ForgotPass from "@/views/ForgotPass.vue";
 import UpdatePass from "@/views/UpdatePass.vue";
 
 const routes = [
-    {
-        path: "/",
-        name: "Landing",
-        component: Landing,
-    },
-    {
-        path: "/auth",
-        name: "Auth",
-        component: Authentication,
-    },
-    {
-        path: "/homesec",
-        name: "home",
-        component: Home,
-        meta: { requiresAuth: true },
-    },
-    {
-      path: "/forgotpass",
-      name: "Forgotpass",
-      component: ForgotPass,
-  },
-  {
-      path: "/updatepass",
-      name: "Updatepass",
-      component: UpdatePass,
-  },
-    {
-        path: "/faqssec",
-        name: "faqs",
-        component: Faq,
-        meta: { requiresAuth: true },
-    },
-    {
-        path: "/settingsec",
-        name: "setting",
-        component: Setting,
-        meta: { requiresAuth: true },
-    },
-    {
-        path: "/profilesec",
-        name: "profile",
-        component: Profile,
-        meta: { requiresAuth: true },
-    },
-    {
-        path: "/adminsection",
-        name: "admin",
-        component: Administrator,
-        meta: { requiresAuth: true },
-    },
+  { path: "/", name: "Landing", component: Landing },
+  { path: "/auth", name: "Auth", component: Authentication },
+  { path: "/homesec", name: "Home", component: Home, meta: { requiresAuth: true } },
+  { path: "/forgotpass", name: "ForgotPass", component: ForgotPass },
+  { path: "/updatepass", name: "UpdatePass", component: UpdatePass, meta: { requiresAuth: true } },
+  { path: "/faqssec", name: "Faq", component: Faq, meta: { requiresAuth: true } },
+  { path: "/settingsec", name: "Setting", component: Setting, meta: { requiresAuth: true } },
+  { path: "/profilesec", name: "Profile", component: Profile, meta: { requiresAuth: true } },
+  { path: "/adminsection", name: "Admin", component: Administrator, meta: { requiresAuth: true } }, 
 ];
 
 const router = createRouter({
-    history: createWebHistory(),
-    routes,
+  history: createWebHistory(),
+  routes,
 });
 
 router.beforeEach(async (to, from, next) => {
   const token = localStorage.getItem("access_token");
-  const isAuthenticated = token !== null;
+  const isAuthenticated = !!token;
 
+  console.log("Navigating to:", to.path);
+  console.log("From route:", from.path);
+  console.log("Is Authenticated:", isAuthenticated);
+  console.log("Requires Auth:", to.meta.requiresAuth);
 
+  // Check if the user is authenticated for protected routes
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    console.log("Not authenticated. Redirecting to /auth.");
+    return next("/auth");
+  }
+
+  // For authenticated users, verify their session
   if (isAuthenticated) {
     try {
-      // Fetch the authenticated user
-      const {
-        data: { user: loggedInUser },
-        error: authError,
-      } = await supabase.auth.getUser();
+      const { data: { user }, error } = await supabase.auth.getUser();
 
-      if (authError || !loggedInUser) {
-        console.error("Error fetching authenticated user:", authError?.message);
-        next("/auth");
-        return;
+      if (error || !user) {
+        console.error("Invalid session detected. Redirecting to /auth.");
+        return next("/auth");
       }
 
-      // Fetch the user's info (use maybeSingle instead of single)
+      console.log("User session valid:", user);
+
+      // Check if the user is an admin and redirect accordingly
       const { data: userInfo, error: userInfoError } = await supabase
         .from("users_info")
         .select("isAdmin")
-        .eq("email", loggedInUser.email)
-        .maybeSingle(); // Allows for no rows to be returned without throwing an error
+        .eq("email", user.email)
+        .maybeSingle();
 
       if (userInfoError) {
-        console.error("Error fetching user info:", userInfoError.message);
-        next("/auth");
-        return;
+        console.error("Failed to fetch user info:", userInfoError.message);
+        return next("/auth");
       }
 
-      // Check if user is an admin and route them accordingly
+      console.log("User info:", userInfo);
+
+      // Redirect admin users to /adminsection if they're not already there
       if (userInfo?.isAdmin && to.path !== "/adminsection") {
-        console.log("Admin user - Redirecting to /adminsection");
-        next("/adminsection");
-        return;
+        console.log("Redirecting admin user to /adminsection.");
+        return next("/adminsection");
       }
+
+      // Allow other authenticated users to proceed to their desired route
+      console.log("Authenticated user allowed to navigate.");
     } catch (error) {
-      console.error("Error during navigation:", error.message);
-      next("/auth");
-      return;
+      console.error("Error during authentication check:", error.message);
+      return next("/auth");
     }
   }
 
-  // If the route requires authentication and the user is not authenticated
-   if (to.meta.requiresAuth && !isAuthenticated) {
-    console.log("Not authenticated - Redirecting to /auth");
-    next("/auth");
-} else if (!to.meta.requiresAuth && isAuthenticated) {
-    console.log("Authenticated - Redirecting to /homesec");
-    next("/homesec");
-} else {
-    console.log("Allowing navigation to:", to.path);
-    next();
-}
+  // Default: Allow navigation
+  console.log("Navigation allowed to:", to.path);
+  next();
 });
 
-
-router.afterEach((to, from) => {
-    const token = localStorage.getItem("access_token"); // Check token in localStorage
-    const isAuthenticated = token !== null;
-    console.log("Token:", localStorage.getItem("access_token"));
-    console.log("Is Authenticated:", isAuthenticated);
-
-    // Only reload the landing page if the user is authenticated
-    if (to.path === "/" && isAuthenticated) {
-        // Reload only if the user is authenticated and trying to navigate to the landing page
-        // You can also trigger a manual session refresh here if necessary
-        setTimeout(() => {
-            window.location.reload(); // Trigger a page reload to reset the app's state
-        }, 100); // Small delay to ensure session state is updated
-    }
-});
 
 export default router;
