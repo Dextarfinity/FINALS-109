@@ -9,7 +9,7 @@
         class="w-full container mx-auto flex flex-wrap items-center justify-between py-2 lg:px-8 xl:px-8"
       >
         <div class="flex items-center pl-4 mt-4">
-          <img src="./images/IconProject.png" alt="" class="w-10" />
+          <img src="./images/IconProject.png" alt="" class="w-10 filter contrast-200" />
           <a
             class="toggleColour text-white no-underline hover:no-underline font-bold text-2xl lg:text-4xl ml-2"
           >

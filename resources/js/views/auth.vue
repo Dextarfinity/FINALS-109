@@ -1,5 +1,6 @@
 <template>
-  <svg
+  <div class="relative w-full h-screen overflow-hidden">
+    <svg
     viewBox="0 0 1428 174"
     version="1.1"
     xmlns="http://www.w3.org/2000/svg"
@@ -117,7 +118,7 @@
                 />
                 <span class="ml-2 buttontext">Remember me</span>
               </label>
-              <a class="text-sm text-black hover:underline buttontext" href="#"
+              <a class="text-sm text-black hover:underline buttontext" href="/forgotpass"
                 >Forgot your password?</a
               >
             </div>
@@ -306,6 +307,8 @@
       </div>
     </div>
   </div>
+  </div>
+ 
 </template>
 
 <script>

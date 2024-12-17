@@ -7,6 +7,8 @@ import Setting from "@/views/SettingsSection.vue";
 import Profile from "@/views/ProfileSection.vue";
 import Administrator from "@/views/Admin.vue";
 import { supabase } from "@/supabaseClient";
+import ForgotPass from "@/views/ForgotPass.vue";
+import UpdatePass from "@/views/UpdatePass.vue";
 
 const routes = [
     {
@@ -25,6 +27,16 @@ const routes = [
         component: Home,
         meta: { requiresAuth: true },
     },
+    {
+      path: "/forgotpass",
+      name: "Forgotpass",
+      component: ForgotPass,
+  },
+  {
+      path: "/updatepass",
+      name: "Updatepass",
+      component: UpdatePass,
+  },
     {
         path: "/faqssec",
         name: "faqs",
