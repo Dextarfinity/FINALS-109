@@ -14,7 +14,9 @@
     >
       <span>{{ toastMessage }}</span>
     </div>
-    <div class="max-w-2xl w-full bg-white rounded-xl shadow-2xl overflow-hidden lg:mt-5">
+    <div
+      class="max-w-2xl w-full bg-white rounded-xl shadow-2xl overflow-hidden lg:mt-5"
+    >
       <form @submit.prevent="updateUserInfo">
         <div class="bg-gray-100 p-8 relative">
           <div class="absolute inset-0 bg-opacity-50 bg-gray-200">
@@ -32,11 +34,19 @@
               >
                 <circle cx="10" cy="10" r="1.6" fill="#a0aec0" />
               </pattern>
-              <rect x="0" y="0" width="100%" height="100%" fill="url(#pattern-circles)" />
+              <rect
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+                fill="url(#pattern-circles)"
+              />
             </svg>
           </div>
           <div class="relative z-2">
-            <h2 class="text-3xl sm:text-2xl font-bold text-gray-800 mb-6 text-center">
+            <h2
+              class="text-3xl sm:text-2xl font-bold text-gray-800 mb-6 text-center"
+            >
               Settings
             </h2>
             <div class="flex flex-col md:flex-row md:items-center mb-6">
@@ -83,7 +93,9 @@
                         maxlength="11"
                         @input="validateNumber"
                       />
-                      <p id="numberError" class="text-red-500">{{ numberError }}</p>
+                      <p id="numberError" class="text-red-500">
+                        {{ numberError }}
+                      </p>
                     </div>
                     <div class="p-6">
                       <button
@@ -108,7 +120,9 @@
                         maxlength="50"
                         id="CarsuEmailInput"
                         class="text-gray-700 bg-transparent border-none focus:outline-none"
-                        :placeholder="userData.carsuEmail || 'Enter your carsu email'"
+                        :placeholder="
+                          userData.carsuEmail || 'Enter your carsu email'
+                        "
                       />
                       <p id="occupationError" class="text-red-500">
                         {{ emailError }}
@@ -124,7 +138,9 @@
                         maxlength="50"
                         id="OccupationInput"
                         class="text-gray-700 bg-transparent border-none focus:outline-none"
-                        :placeholder="userData.occupation || 'Enter your occupation'"
+                        :placeholder="
+                          userData.occupation || 'Enter your occupation'
+                        "
                         @input="validateOccupation"
                       />
                       <p id="occupationError" class="text-red-500">
@@ -141,7 +157,9 @@
                         maxlength="50"
                         id="csuIdInput"
                         class="text-gray-700 bg-transparent border-none focus:outline-none"
-                        :placeholder="userData.csuIdNumber || 'Enter your ID number'"
+                        :placeholder="
+                          userData.csuIdNumber || 'Enter your ID number'
+                        "
                         @input="validateCarsu"
                       />
                       <span id="occupationError" class="text-red-500">
@@ -163,13 +181,21 @@
 
             <!-- Avatar Selector -->
             <div class="">
-              <h4 class="text-lg font-semibold text-gray-800 mb-2">Choose an Avatar</h4>
+              <h4 class="text-lg font-semibold text-gray-800 mb-2">
+                Choose an Avatar
+              </h4>
               <div class="grid grid-cols-3 sm:grid-cols-4 gap-4">
-                <div v-for="(avatar, index) in avatars" :key="index" class="relative">
+                <div
+                  v-for="(avatar, index) in avatars"
+                  :key="index"
+                  class="relative"
+                >
                   <img
                     :src="avatar"
                     @click="selectAvatar(avatar)"
-                    :class="{ 'border-4 border-orange-600': avatar === avatarUrl }"
+                    :class="{
+                      'border-4 border-orange-600': avatar === avatarUrl,
+                    }"
                     class="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity duration-300"
                   />
                 </div>
@@ -181,7 +207,9 @@
 
       <div class="sm:p-8">
         <form @submit.prevent="updatePassword" class="space-y-6">
-          <h4 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+          <h4
+            class="text-xl font-semibold text-gray-800 mb-4 flex items-center"
+          >
             <LockIcon class="w-6 h-6 text-black mr-2" />
             Change Password
           </h4>
@@ -264,7 +292,9 @@ export default {
     showToast(message, type) {
       this.toastMessage = message;
       this.toastColor =
-        type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white";
+        type === "success"
+          ? "bg-green-500 text-white"
+          : "bg-red-500 text-white";
       this.toastVisible = true;
       setTimeout(() => {
         this.hideToast();
@@ -313,7 +343,8 @@ export default {
       try {
         // Check if the email matches the domain pattern
         const domainRegex = /^[^\s@]+@carsu\.edu\.ph$/;
-        if (!domainRegex.test(this.carsuEmail)) throw new Error("Invalid-domain");
+        if (!domainRegex.test(this.carsuEmail))
+          throw new Error("Invalid-domain");
         // Check if the email is empty or contains only spaces
         if (!this.carsuEmail.trim()) throw new Error("Empty-email");
 
@@ -348,7 +379,8 @@ export default {
         }
 
         // Format the number with a dash after the 3rd digit
-        this.csuIdNumber = this.csuIdNumber.slice(0, 3) + "-" + this.csuIdNumber.slice(3);
+        this.csuIdNumber =
+          this.csuIdNumber.slice(0, 3) + "-" + this.csuIdNumber.slice(3);
 
         // Reset error message and return true for a valid number
         this.idnumError = "";
@@ -408,7 +440,11 @@ export default {
           this.showToast("Please fill in all fields for Updating.", "error");
         }
       } else if (formType === "updateOnce") {
-        if (this.validateOccupation() && this.validateCarsu() && this.validateEmail()) {
+        if (
+          this.validateOccupation() &&
+          this.validateCarsu() &&
+          this.validateEmail()
+        ) {
           try {
             const {
               data: { user: loggedInUser },
@@ -438,7 +474,10 @@ export default {
             }
 
             if (userInfo.info_updated) {
-              this.showToast("You can only update your information once.", "error");
+              this.showToast(
+                "You can only update your information once.",
+                "error"
+              );
               return;
             }
 
@@ -472,7 +511,14 @@ export default {
 <script setup>
 import { supabase } from "../supabaseClient";
 import { ref, onMounted } from "vue";
-import { MailIcon, PhoneIcon, LockIcon, Hash, Briefcase, User } from "lucide-vue-next";
+import {
+  MailIcon,
+  PhoneIcon,
+  LockIcon,
+  Hash,
+  Briefcase,
+  User,
+} from "lucide-vue-next";
 import Navbar from "@/components/body.vue";
 
 defineProps({
@@ -566,7 +612,9 @@ async function fetchUserDetails() {
 
     const { data, error } = await supabase
       .from("users_info")
-      .select("email, phone_number, fullname, csu_id_number, occupation, carsu_email")
+      .select(
+        "email, phone_number, fullname, csu_id_number, occupation, carsu_email"
+      )
       .eq("id", loggedInUser.id)
       .single();
 

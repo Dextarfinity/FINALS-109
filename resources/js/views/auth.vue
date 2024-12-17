@@ -1,6 +1,7 @@
 <template>
   <div class="relative w-full h-screen overflow-hidden">
     <svg
+<<<<<<< HEAD
     viewBox="0 0 1428 174"
     version="1.1"
     xmlns="http://www.w3.org/2000/svg"
@@ -42,266 +43,325 @@
           <path
             d="M0.457,34.035 C57.086,53.198 98.208,65.809 123.822,71.865 C181.454,85.495 234.295,90.29 272.033,93.459 C311.355,96.759 396.635,95.801 461.025,91.663 C486.76,90.01 518.727,86.372 556.926,80.752 C595.747,74.596 622.372,70.008 636.799,66.991 C663.913,61.324 712.501,49.503 727.605,46.128 C780.47,34.317 818.839,22.532 856.324,15.904 C922.689,4.169 955.676,2.522 1011.185,0.432 C1060.705,1.477 1097.39,3.129 1121.236,5.387 C1161.703,9.219 1208.621,17.821 1235.4,22.304 C1285.855,30.748 1354.351,47.432 1440.886,72.354 L1441.191,104.352 L1.121,104.031 L0.457,34.035 Z"
           ></path>
+=======
+      viewBox="0 0 1428 174"
+      version="1.1"
+      xmlns="http://www.w3.org/2000/svg"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+    >
+      <defs>
+        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color: #d53369; stop-opacity: 1" />
+          <stop offset="100%" style="stop-color: #daae51; stop-opacity: 1" />
+        </linearGradient>
+      </defs>
+      <!-- Flip the SVG both vertically and horizontally by scaling x and y to -1 -->
+      <g transform="scale(-1, -1) translate(-1428, -174)">
+        <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+          <g
+            transform="translate(-2.000000, 44.000000)"
+            fill="url(#gradient)"
+            fill-rule="nonzero"
+          >
+            <path
+              d="M0,0 C90.7283404,0.927527913 147.912752,27.187927 291.910178,59.9119003 C387.908462,81.7278826 543.605069,89.334785 759,82.7326078 C469.336065,156.254352 216.336065,153.6679 0,74.9732496"
+              opacity="0.100000001"
+            ></path>
+            <path
+              d="M100,104.708498 C277.413333,72.2345949 426.147877,52.5246657 546.203633,45.5787101 C666.259389,38.6327546 810.524845,41.7979068 979,55.0741668 C931.069965,56.122511 810.303266,74.8455141 616.699903,111.243176 C423.096539,147.640838 250.863238,145.462612 100,104.708498 Z"
+              opacity="0.100000001"
+            ></path>
+            <path
+              d="M1046,51.6521276 C1130.83045,29.328812 1279.08318,17.607883 1439,40.1656806 L1439,120 C1271.17211,77.9435312 1140.17211,55.1609071 1046,51.6521276 Z"
+              id="Path-4"
+              opacity="0.200000003"
+            ></path>
+          </g>
+          <g
+            transform="translate(-4.000000, 76.000000)"
+            fill="url(#gradient)"
+            fill-rule="nonzero"
+          >
+            <path
+              d="M0.457,34.035 C57.086,53.198 98.208,65.809 123.822,71.865 C181.454,85.495 234.295,90.29 272.033,93.459 C311.355,96.759 396.635,95.801 461.025,91.663 C486.76,90.01 518.727,86.372 556.926,80.752 C595.747,74.596 622.372,70.008 636.799,66.991 C663.913,61.324 712.501,49.503 727.605,46.128 C780.47,34.317 818.839,22.532 856.324,15.904 C922.689,4.169 955.676,2.522 1011.185,0.432 C1060.705,1.477 1097.39,3.129 1121.236,5.387 C1161.703,9.219 1208.621,17.821 1235.4,22.304 C1285.855,30.748 1354.351,47.432 1440.886,72.354 L1441.191,104.352 L1.121,104.031 L0.457,34.035 Z"
+            ></path>
+          </g>
+>>>>>>> 094934c6b9c83a95f8f438320cd9497d80932e37
         </g>
       </g>
-    </g>
-  </svg>
-  <div
-    :class="[
-      'transparency fixed top-5 left-1/2 transform -translate-x-1/2 z-50 p-4 rounded shadow-lg transition-opacity duration-500',
-      toastVisible ? 'opacity-100' : 'opacity-0',
-      toastColor,
-    ]"
-    @transitionend="onTransitionEnd"
-  >
-    <span>{{ toastMessage }}</span>
-  </div>
-  <div
-    class="container px-3 mx-auto flex flex-wrap flex-col md:flex-row items-center bg-white authbody"
-  >
-    <!--Left Col-->
-    <div class="w-full md:w-2/5 py-6 text-center">
-      <img class="w-full md:w-5/5 z-50" src=".\images\loadingscreen.gif" />
-    </div>
-
-    <!--Right Col-->
-
+    </svg>
     <div
-      id="form-wrapper"
-      class="formwrap max-w-md w-full rounded-xl shadow-2xl overflow-hidden p-8 space-y-8 welcome_style"
+      :class="[
+        'transparency fixed top-5 left-1/2 transform -translate-x-1/2 z-50 p-4 rounded shadow-lg transition-opacity duration-500',
+        toastVisible ? 'opacity-100' : 'opacity-0',
+        toastColor,
+      ]"
+      @transitionend="onTransitionEnd"
     >
-      <div id="form-container" :class="{ 'signup-active': currentForm === 'signup' }">
-        <!-- Login Form -->
-        <div id="login-form" class="form-slide">
-          <h2 class="text-center text-4xl font-extrabold text-black">WELCOME</h2>
-          <p class="text-center text-black pb-5">Sign in to your account</p>
-          <form @submit.prevent="handleSubmit('login')" class="space-y-6 text-black">
-            <div class="relative">
-              <input
-                v-model="loginEmail"
-                placeholder="Email address"
-                class="peer h-10 w-full border-b-2 border-black text-black bg-transparent placeholder-transparent focus:outline-none focus:border-black"
-                id="login-email"
-                name="login-email"
-                type="email"
-                maxlength="50"
-                required
-              />
-              <label
-                class="font-semibold absolute left-0 -top-3.5 text-black text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-black peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-black peer-focus:text-sm"
-                for="login-email"
-                >Email address</label
-              >
-            </div>
-            <div class="relative">
-              <input
-                v-model="loginPassword"
-                placeholder="Password"
-                class="peer h-10 w-full border-b-2 border-black text-black bg-transparent placeholder-transparent focus:outline-none focus:border-black"
-                id="login-password"
-                name="login-password"
-                type="password"
-                required
-                maxlength="50"
-              />
-              <label
-                class="font-semibold absolute left-0 -top-3.5 text-black text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-black peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-black peer-focus:text-sm"
-                for="login-password"
-                >Password</label
-              >
-            </div>
-            <div class="flex items-center justify-between">
-              <label class="flex items-center text-sm text-black">
+      <span>{{ toastMessage }}</span>
+    </div>
+    <div
+      class="container px-3 mx-auto flex flex-wrap flex-col md:flex-row items-center bg-white authbody"
+    >
+      <!--Left Col-->
+      <div class="w-full md:w-2/5 py-6 text-center">
+        <img class="w-full md:w-5/5 z-50" src=".\images\loadingscreen.gif" />
+      </div>
+
+      <!--Right Col-->
+
+      <div
+        id="form-wrapper"
+        class="formwrap max-w-md w-full rounded-xl shadow-2xl overflow-hidden p-8 space-y-8 welcome_style"
+      >
+        <div
+          id="form-container"
+          :class="{ 'signup-active': currentForm === 'signup' }"
+        >
+          <!-- Login Form -->
+          <div id="login-form" class="form-slide">
+            <h2 class="text-center text-4xl font-extrabold text-black">
+              WELCOME
+            </h2>
+            <p class="text-center text-black pb-5">Sign in to your account</p>
+            <form
+              @submit.prevent="handleSubmit('login')"
+              class="space-y-6 text-black"
+            >
+              <div class="relative">
                 <input
-                  class="form-checkbox h-4 w-4 text-black bg-black border-black rounded"
-                  type="checkbox"
+                  v-model="loginEmail"
+                  placeholder="Email address"
+                  class="peer h-10 w-full border-b-2 border-black text-black bg-transparent placeholder-transparent focus:outline-none focus:border-black"
+                  id="login-email"
+                  name="login-email"
+                  type="email"
+                  maxlength="50"
+                  required
                 />
-                <span class="ml-2 buttontext">Remember me</span>
-              </label>
-              <a class="text-sm text-black hover:underline buttontext" href="/forgotpass"
-                >Forgot your password?</a
-              >
-            </div>
+                <label
+                  class="font-semibold absolute left-0 -top-3.5 text-black text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-black peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-black peer-focus:text-sm"
+                  for="login-email"
+                  >Email address</label
+                >
+              </div>
+              <div class="relative">
+                <input
+                  v-model="loginPassword"
+                  placeholder="Password"
+                  class="peer h-10 w-full border-b-2 border-black text-black bg-transparent placeholder-transparent focus:outline-none focus:border-black"
+                  id="login-password"
+                  name="login-password"
+                  type="password"
+                  required
+                  maxlength="50"
+                />
+                <label
+                  class="font-semibold absolute left-0 -top-3.5 text-black text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-black peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-black peer-focus:text-sm"
+                  for="login-password"
+                  >Password</label
+                >
+              </div>
+              <div class="flex items-center justify-between">
+                <label class="flex items-center text-sm text-black">
+                  <input
+                    class="form-checkbox h-4 w-4 text-black bg-black border-black rounded"
+                    type="checkbox"
+                  />
+                  <span class="ml-2 buttontext">Remember me</span>
+                </label>
+                <a
+                  class="text-sm text-black hover:underline buttontext"
+                  href="/forgotpass"
+                  >Forgot your password?</a
+                >
+              </div>
 
-            <button
-              class="w-full py-2 px-4 bg-black hover:bg-black rounded-md shadow-lg text-white font-semibold transition duration-200"
-              type="submit"
-            >
-              Sign In
-            </button>
-            <hr class="divider-line" />
-            <!-- Google Authentication Button -->
-            <div class="text-center mt-4">
               <button
-                @click="handleGoogleSignIn"
-                class="w-full py-2 px-4 bg-white border border-gray-300 hover:bg-gray-100 rounded-md shadow-lg text-black font-semibold transition duration-200 flex items-center justify-center"
-                type="button"
+                class="w-full py-2 px-4 bg-black hover:bg-black rounded-md shadow-lg text-white font-semibold transition duration-200"
+                type="submit"
               >
-                <img
-                  src="https://www.svgrepo.com/show/355037/google.svg"
-                  alt="Google Icon"
-                  class="w-6 h-6 mr-2"
-                />
-                Login with Google
+                Sign In
+              </button>
+              <hr class="divider-line" />
+              <!-- Google Authentication Button -->
+              <div class="text-center mt-4">
+                <button
+                  @click="handleGoogleSignIn"
+                  class="w-full py-2 px-4 bg-white border border-gray-300 hover:bg-gray-100 rounded-md shadow-lg text-black font-semibold transition duration-200 flex items-center justify-center"
+                  type="button"
+                >
+                  <img
+                    src="https://www.svgrepo.com/show/355037/google.svg"
+                    alt="Google Icon"
+                    class="w-6 h-6 mr-2"
+                  />
+                  Login with Google
+                </button>
+              </div>
+            </form>
+            <div class="text-center text-black mt-3">
+              Don't have an account?
+              <button
+                @click="toggleForm('signup')"
+                id="toggle-signup"
+                class="text-black hover:underline"
+              >
+                Sign up
               </button>
             </div>
-          </form>
-          <div class="text-center text-black mt-3">
-            Don't have an account?
-            <button
-              @click="toggleForm('signup')"
-              id="toggle-signup"
-              class="text-black hover:underline"
-            >
-              Sign up
-            </button>
           </div>
-        </div>
 
-        <!-- Sign Up Form -->
-        <div id="signup-form" class="form-slide">
-          <h2 class="text-center text-4xl font-extrabold text-black">SIGN UP</h2>
-          <p class="text-center text-black pb-5">Create your account</p>
-          <form @submit.prevent="handleSubmit('signup')" class="space-y-6 text-black">
-            <div class="relative">
-              <input
-                v-model="fullname"
-                placeholder="Full Name"
-                class="peer h-10 w-full border-b-2 border-black text-black bg-transparent placeholder-transparent focus:outline-none focus:border-black"
-                id="signup-fullname"
-                name="full-name"
-                type="text"
-                maxlength="50"
-                required
-                @input="validateFullname"
-              />
-              <p id="nameError" class="text-red-500">
-                {{ nameError }}
-              </p>
-              <label
-                class="font-bold absolute left-0 -top-3.5 text-black text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-black peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-black peer-focus:text-sm"
-                for="signup-fullname"
-                >Full Name</label
-              >
-            </div>
-
-            <div class="relative">
-              <input
-                v-model="email"
-                placeholder="Email address"
-                class="peer h-10 w-full border-b-2 border-black text-black bg-transparent placeholder-transparent focus:outline-none focus:border-black"
-                id="signup-email"
-                name="signup-email"
-                type="email"
-                maxlength="50"
-                required
-              />
-              <label
-                class="font-bold absolute left-0 -top-3.5 text-black text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-black peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-black peer-focus:text-sm"
-                for="signup-email"
-                >Email address</label
-              >
-            </div>
-
-            <div class="relative">
-              <input
-                v-model="phone_number"
-                placeholder="Phone number"
-                class="peer h-10 w-full border-b-2 border-black text-black bg-transparent placeholder-transparent focus:outline-none focus:border-black"
-                id="number"
-                name="number"
-                type="text"
-                maxlength="11"
-                required
-                @input="validateNumber"
-              />
-              <p id="numberError" class="text-red-500">
-                {{ numberError }}
-              </p>
-              <label
-                class="font-bold absolute left-0 -top-3.5 text-black text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-black peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-black peer-focus:text-sm"
-                for="number"
-                >Phone number</label
-              >
-            </div>
-
-            <div class="relative">
-              <input
-                v-model="password"
-                placeholder="Password"
-                class="peer h-10 w-full border-b-2 border-black text-black bg-transparent placeholder-transparent focus:outline-none focus:border-black"
-                id="signup-password"
-                name="signup-password"
-                type="password"
-                maxlength="50"
-                required
-                @input="validatePassword"
-              />
-              <p id="passwordError" class="text-red-500">
-                {{ passwordError }}
-              </p>
-              <label
-                class="font-bold absolute left-0 -top-3.5 text-black text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-black peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-black peer-focus:text-sm"
-                for="signup-password"
-                >Password</label
-              >
-            </div>
-
-            <!-- Confirm Password Field -->
-            <div class="relative">
-              <input
-                v-model="confirmPassword"
-                placeholder="Confirm Password"
-                class="peer h-10 w-full border-b-2 border-black text-black bg-transparent placeholder-transparent focus:outline-none focus:border-black"
-                id="signup-confirm-password"
-                name="confirm-password"
-                type="password"
-                maxlength="50"
-                required
-                @keypress.enter="validateConfirmPassword"
-              />
-              <p id="confirmPasswordError" class="text-red-500">
-                {{ confirmPasswordError }}
-              </p>
-              <label
-                class="font-bold absolute left-0 -top-3.5 text-black text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-black peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-black peer-focus:text-sm"
-                for="signup-confirm-password"
-                >Confirm Password</label
-              >
-            </div>
-
-            <button
-              class="w-full py-2 px-4 bg-black hover:bg-black rounded-md shadow-lg text-white font-semibold transition duration-200"
-              type="submit"
+          <!-- Sign Up Form -->
+          <div id="signup-form" class="form-slide">
+            <h2 class="text-center text-4xl font-extrabold text-black">
+              SIGN UP
+            </h2>
+            <p class="text-center text-black pb-5">Create your account</p>
+            <form
+              @submit.prevent="handleSubmit('signup')"
+              class="space-y-6 text-black"
             >
-              Sign Up
-            </button>
-            <hr class="divider-line" />
-            <!-- Google Authentication Button -->
-            <div class="text-center mt-4">
-              <button
-                @click="handleGoogleSignIn"
-                class="w-full py-2 px-4 bg-white border border-gray-300 hover:bg-gray-100 rounded-md shadow-lg text-black font-semibold transition duration-200 flex items-center justify-center"
-                type="button"
-              >
-                <img
-                  src="https://www.svgrepo.com/show/355037/google.svg"
-                  alt="Google Icon"
-                  class="w-6 h-6 mr-2"
+              <div class="relative">
+                <input
+                  v-model="fullname"
+                  placeholder="Full Name"
+                  class="peer h-10 w-full border-b-2 border-black text-black bg-transparent placeholder-transparent focus:outline-none focus:border-black"
+                  id="signup-fullname"
+                  name="full-name"
+                  type="text"
+                  maxlength="50"
+                  required
+                  @input="validateFullname"
                 />
-                Continue with Google
+                <p id="nameError" class="text-red-500">
+                  {{ nameError }}
+                </p>
+                <label
+                  class="font-bold absolute left-0 -top-3.5 text-black text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-black peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-black peer-focus:text-sm"
+                  for="signup-fullname"
+                  >Full Name</label
+                >
+              </div>
+
+              <div class="relative">
+                <input
+                  v-model="email"
+                  placeholder="Email address"
+                  class="peer h-10 w-full border-b-2 border-black text-black bg-transparent placeholder-transparent focus:outline-none focus:border-black"
+                  id="signup-email"
+                  name="signup-email"
+                  type="email"
+                  maxlength="50"
+                  required
+                />
+                <label
+                  class="font-bold absolute left-0 -top-3.5 text-black text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-black peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-black peer-focus:text-sm"
+                  for="signup-email"
+                  >Email address</label
+                >
+              </div>
+
+              <div class="relative">
+                <input
+                  v-model="phone_number"
+                  placeholder="Phone number"
+                  class="peer h-10 w-full border-b-2 border-black text-black bg-transparent placeholder-transparent focus:outline-none focus:border-black"
+                  id="number"
+                  name="number"
+                  type="text"
+                  maxlength="11"
+                  required
+                  @input="validateNumber"
+                />
+                <p id="numberError" class="text-red-500">
+                  {{ numberError }}
+                </p>
+                <label
+                  class="font-bold absolute left-0 -top-3.5 text-black text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-black peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-black peer-focus:text-sm"
+                  for="number"
+                  >Phone number</label
+                >
+              </div>
+
+              <div class="relative">
+                <input
+                  v-model="password"
+                  placeholder="Password"
+                  class="peer h-10 w-full border-b-2 border-black text-black bg-transparent placeholder-transparent focus:outline-none focus:border-black"
+                  id="signup-password"
+                  name="signup-password"
+                  type="password"
+                  maxlength="50"
+                  required
+                  @input="validatePassword"
+                />
+                <p id="passwordError" class="text-red-500">
+                  {{ passwordError }}
+                </p>
+                <label
+                  class="font-bold absolute left-0 -top-3.5 text-black text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-black peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-black peer-focus:text-sm"
+                  for="signup-password"
+                  >Password</label
+                >
+              </div>
+
+              <!-- Confirm Password Field -->
+              <div class="relative">
+                <input
+                  v-model="confirmPassword"
+                  placeholder="Confirm Password"
+                  class="peer h-10 w-full border-b-2 border-black text-black bg-transparent placeholder-transparent focus:outline-none focus:border-black"
+                  id="signup-confirm-password"
+                  name="confirm-password"
+                  type="password"
+                  maxlength="50"
+                  required
+                  @keypress.enter="validateConfirmPassword"
+                />
+                <p id="confirmPasswordError" class="text-red-500">
+                  {{ confirmPasswordError }}
+                </p>
+                <label
+                  class="font-bold absolute left-0 -top-3.5 text-black text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-black peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-black peer-focus:text-sm"
+                  for="signup-confirm-password"
+                  >Confirm Password</label
+                >
+              </div>
+
+              <button
+                class="w-full py-2 px-4 bg-black hover:bg-black rounded-md shadow-lg text-white font-semibold transition duration-200"
+                type="submit"
+              >
+                Sign Up
+              </button>
+              <hr class="divider-line" />
+              <!-- Google Authentication Button -->
+              <div class="text-center mt-4">
+                <button
+                  @click="handleGoogleSignIn"
+                  class="w-full py-2 px-4 bg-white border border-gray-300 hover:bg-gray-100 rounded-md shadow-lg text-black font-semibold transition duration-200 flex items-center justify-center"
+                  type="button"
+                >
+                  <img
+                    src="https://www.svgrepo.com/show/355037/google.svg"
+                    alt="Google Icon"
+                    class="w-6 h-6 mr-2"
+                  />
+                  Continue with Google
+                </button>
+              </div>
+            </form>
+            <div class="text-center text-black mt-3">
+              Already have an account?
+              <button
+                @click="toggleForm('login')"
+                id="toggle-login"
+                class="text-black hover:underline"
+              >
+                Sign in
               </button>
             </div>
-          </form>
-          <div class="text-center text-black mt-3">
-            Already have an account?
-            <button
-              @click="toggleForm('login')"
-              id="toggle-login"
-              class="text-black hover:underline"
-            >
-              Sign in
-            </button>
           </div>
         </div>
       </div>
@@ -314,7 +374,6 @@
 <script>
 import { supabase } from "../supabaseClient"; // supabase link
 import { useRouter } from "vue-router";
-
 export default {
   name: "Auth",
   data() {
@@ -349,7 +408,9 @@ export default {
     showToast(message, type) {
       this.toastMessage = message;
       this.toastColor =
-        type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white";
+        type === "success"
+          ? "bg-green-500 text-white"
+          : "bg-red-500 text-white";
       this.toastVisible = true;
       setTimeout(() => {
         this.hideToast();
@@ -358,6 +419,11 @@ export default {
     hideToast() {
       this.toastVisible = false;
     },
+<<<<<<< HEAD
+=======
+
+    // Google login function
+>>>>>>> 094934c6b9c83a95f8f438320cd9497d80932e37
     async handleGoogleSignIn() {
       try {
         const { data, error } = await supabase.auth.signInWithOAuth({
@@ -371,6 +437,7 @@ export default {
           localStorage.setItem("access_token", session.access_token);
           this.showToast("Google login successful!", "success");
 
+<<<<<<< HEAD
           // Fetch user details from `auth.users`
           const { data: userData, error: userError } = await supabase.auth.getUser();
           if (userError) throw userError;
@@ -411,6 +478,10 @@ export default {
 
           // Redirect to the home page
           this.$router.push("/homesec");
+=======
+          // Redirect to the desired page
+          this.$router.replace("/homesec");
+>>>>>>> 094934c6b9c83a95f8f438320cd9497d80932e37
         } else {
           throw new Error("No session or access token found.");
         }
@@ -424,7 +495,8 @@ export default {
       try {
         if (!this.fullname.trim()) throw new Error("Empty-name");
         if (this.fullname.length < 10) throw new Error("short");
-        if (!/^[A-Za-z\s]+$/.test(this.fullname)) throw new Error("invalidName");
+        if (!/^[A-Za-z\s]+$/.test(this.fullname))
+          throw new Error("invalidName");
         this.nameError = ""; // Clear error if validation passes
         return true;
       } catch (error) {
@@ -505,7 +577,7 @@ export default {
 
             // Show success toast on login
             this.showToast("Login successful!", "success");
-            this.$router.push("/homesec");
+            this.$router.replace("/homesec");
           } catch (error) {
             this.showToast(`Login error: ${error.message}`, "error");
           }
@@ -528,18 +600,21 @@ export default {
             if (error) throw error;
 
             const user_id = data.user?.id;
-            if (!user_id) throw new Error("Failed to get user ID during signup");
+            if (!user_id)
+              throw new Error("Failed to get user ID during signup");
 
             localStorage.setItem("user_id", user_id);
 
-            const { error: insertError } = await supabase.from("users_info").insert([
-              {
-                id: user_id,
-                email: this.email,
-                phone_number: this.phone_number,
-                fullname: this.fullname,
-              },
-            ]);
+            const { error: insertError } = await supabase
+              .from("users_info")
+              .insert([
+                {
+                  id: user_id,
+                  email: this.email,
+                  phone_number: this.phone_number,
+                  fullname: this.fullname,
+                },
+              ]);
 
             if (insertError) throw new Error("Unable to save user details");
 
@@ -548,12 +623,15 @@ export default {
               "Signup successful! Confirm your email to proceed login.",
               "success"
             );
-            this.$router.push("/homesec");
+            this.$router.push("/");
           } catch (error) {
             this.showToast(`Signup error: ${error.message}`, "error");
           }
         } else {
-          this.showToast("Please correct the errors in the signup form.", "error");
+          this.showToast(
+            "Please correct the errors in the signup form.",
+            "error"
+          );
         }
       }
     },
