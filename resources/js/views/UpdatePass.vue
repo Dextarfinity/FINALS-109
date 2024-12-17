@@ -1,5 +1,15 @@
 <template>
   <div class="relative w-full h-screen overflow-hidden">
+    <div
+      :class="[
+        'transparency fixed top-5 left-1/2 transform -translate-x-1/2 z-50 p-4 rounded shadow-lg transition-opacity duration-500',
+        toastVisible ? 'opacity-100' : 'opacity-0',
+        toastColor,
+      ]"
+      @transitionend="onTransitionEnd"
+    >
+      <span>{{ toastMessage }}</span>
+    </div>
     <svg
       viewBox="0 0 1428 174"
       version="1.1"
@@ -61,7 +71,7 @@
         id="form-wrapper"
         class="formwrap max-w-md w-full rounded-xl shadow-2xl overflow-hidden p-8 space-y-8 welcome_style min-h-100"
       >
-        <div id="form-container">
+        <div id="form-container" class="from-container">
           <div id="signup-form" class="form-slide">
             <h2 class="text-center text-4xl font-extrabold text-black">
               UPDATE PASSWORD
@@ -153,11 +163,32 @@
     </div>
   </div>
 </template>
-
 <script setup>
 import { supabase } from "../supabaseClient";
 import Navbar from "@/components/body.vue";
 import { ref } from "vue";
+import { useRouter } from "vue-router";
+
+// Toast handling function
+const toastMessage = ref("");
+const toastColor = ref("");
+const toastVisible = ref(false);
+
+const showToast = (message, type) => {
+  toastMessage.value = message;
+  toastColor.value =
+    type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white";
+  toastVisible.value = true;
+  setTimeout(() => {
+    hideToast();
+  }, 3000);
+};
+
+const hideToast = () => {
+  toastVisible.value = false;
+};
+
+const router = useRouter(); // Use the router instance
 
 // Reactive variables
 const email = ref("");
@@ -227,14 +258,19 @@ const handleSubmit = async () => {
 
       if (error) {
         console.error("Error updating details:", error.message);
+        showToast(`Error: ${error.message}`, "error");
       } else {
         console.log("Details updated successfully:", data);
+        showToast("Details updated successfully.", "success");
+        router.push("/auth");
       }
     } catch (error) {
       console.error("Unexpected error:", error);
+      showToast("An unexpected error occurred. Please try again.", "error");
     }
   } else {
     console.log("Form contains errors. Please fix them before submitting.");
+    showToast("Please fix the errors before submitting the form.", "error");
   }
 };
 </script>
@@ -302,6 +338,20 @@ svg {
     font-size: 3rem;
     /* Increase size for medium screens */
   }
+  #form-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    height: calc(100vh - 50px); /* Adjust height as needed */
+    overflow-y: auto; /* Enable vertical scrolling */
+    padding: 2rem;
+    background-color: rgba(255, 255, 255, 0);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+  }
+  #form-container {
+    height: 650px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -325,6 +375,21 @@ svg {
   }
   .authbody {
     margin-top: -100px;
+    margin-bottom: 200px;
+  }
+  #form-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    height: calc(100vh - 50px); /* Adjust height as needed */
+    overflow-y: auto; /* Enable vertical scrolling */
+    padding: 2rem;
+    background-color: rgba(255, 255, 255, 0);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+  }
+  #form-container {
+    height: 650px;
   }
 }
 
@@ -334,7 +399,7 @@ svg {
   width: 100%;
   max-width: 600px;
   /* Increase max-width for larger forms */
-  overflow: hidden;
+  overflow-x: hidden;
   padding: 2rem;
   /* Add padding around the container */
   background-color: rgba(255, 255, 255, 0);
@@ -379,5 +444,6 @@ svg {
 html,
 body {
   overflow-x: hidden;
+  overflow-y: auto;
 }
 </style>

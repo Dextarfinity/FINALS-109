@@ -1,5 +1,15 @@
 <template>
   <div class="relative w-full h-screen overflow-hidden">
+    <div
+      :class="[
+        'transparency fixed top-5 left-1/2 transform -translate-x-1/2 z-50 p-4 rounded shadow-lg transition-opacity duration-500',
+        toastVisible ? 'opacity-100' : 'opacity-0',
+        toastColor,
+      ]"
+      @transitionend="onTransitionEnd"
+    >
+      <span>{{ toastMessage }}</span>
+    </div>
     <svg
       viewBox="0 0 1428 174"
       version="1.1"
@@ -100,10 +110,7 @@
               </button>
 
               <div class="flex items-center flex-grow justify-end">
-                <a
-                  class="text-sm text-black hover:underline buttontext"
-                  href="/auth"
-                >
+                <a class="text-sm text-black hover:underline buttontext" href="/auth">
                   Change Your Mind?
                 </a>
               </div>
@@ -114,10 +121,28 @@
     </div>
   </div>
 </template>
-
 <script setup>
 import { ref } from "vue";
 import { supabase } from "../supabaseClient";
+
+// Toast handling function
+const toastMessage = ref("");
+const toastColor = ref("");
+const toastVisible = ref(false);
+
+const showToast = (message, type) => {
+  toastMessage.value = message;
+  toastColor.value =
+    type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white";
+  toastVisible.value = true;
+  setTimeout(() => {
+    hideToast();
+  }, 3000);
+};
+
+const hideToast = () => {
+  toastVisible.value = false;
+};
 
 // Reactive variables
 const email = ref("");
@@ -126,7 +151,7 @@ const isSubmitting = ref(false);
 // Handle form submission
 const handleSubmit = async () => {
   if (isSubmitting.value) {
-    console.log("Please wait before retrying.");
+    showToast("Please wait before retrying.", "error");
     return;
   }
 
@@ -137,20 +162,22 @@ const handleSubmit = async () => {
 
     if (error) {
       console.error("Error recovering password:", error.message);
+      showToast(`Error: ${error.message}`, "error");
     } else {
       console.log("Password recovery email sent:", data);
+      showToast("Password recovery email sent successfully.", "success");
     }
   } catch (error) {
     console.error("Unexpected error:", error);
+    showToast("An unexpected error occurred. Please try again.", "error");
   } finally {
-    // Allow retry after 5 seconds
+    // Allow retry after 20 seconds
     setTimeout(() => {
       isSubmitting.value = false;
-    }, 20000); // 5 seconds
+    }, 20000);
   }
 };
 </script>
-
 
 <style scoped>
 .authbody {
@@ -215,6 +242,20 @@ svg {
     font-size: 3rem;
     /* Increase size for medium screens */
   }
+  #form-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    height: calc(100vh - 50px); /* Adjust height as needed */
+    overflow-y: auto; /* Enable vertical scrolling */
+    padding: 2rem;
+    background-color: rgba(255, 255, 255, 0);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+  }
+  #form-container {
+    height: 650px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -238,6 +279,21 @@ svg {
   }
   .authbody {
     margin-top: -100px;
+    margin-bottom: 200px;
+  }
+  #form-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    height: calc(100vh - 50px); /* Adjust height as needed */
+    overflow-y: auto; /* Enable vertical scrolling */
+    padding: 2rem;
+    background-color: rgba(255, 255, 255, 0);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+  }
+  #form-container {
+    height: 600px;
   }
 }
 
@@ -247,7 +303,7 @@ svg {
   width: 100%;
   max-width: 600px;
   /* Increase max-width for larger forms */
-  overflow: hidden;
+  overflow-x: hidden;
   padding: 2rem;
   /* Add padding around the container */
   background-color: rgba(255, 255, 255, 0);
@@ -292,5 +348,6 @@ svg {
 html,
 body {
   overflow-x: hidden;
+  overflow-y: auto;
 }
 </style>

@@ -36,6 +36,34 @@ router.beforeEach(async (to, from, next) => {
   console.log("Is Authenticated:", isAuthenticated);
   console.log("Requires Auth:", to.meta.requiresAuth);
 
+  // Bypass auth for updatepass, but validate session tokens if available
+  if (to.path === "/updatepass") {
+    const url = new URL(window.location.href);
+    const accessToken = url.hash.match(/access_token=([^&]*)/);
+    const refreshToken = url.hash.match(/refresh_token=([^&]*)/);
+  
+    if (accessToken && refreshToken) {
+      console.log("Setting session from recovery tokens...");
+      const { error } = await supabase.auth.setSession({
+        access_token: accessToken[1],
+        refresh_token: refreshToken[1],
+      });
+  
+      if (error) {
+        console.error("Failed to set session:", error.message);
+        return next("/auth"); // Redirect to login if session setup fails
+      }
+  
+      console.log("Session set successfully.");
+      // Clean up the URL by removing the hash tokens
+      window.history.replaceState({}, document.title, "/updatepass");
+    }
+  
+    return next();
+  }
+  
+
+
   // Check if the user is authenticated for protected routes
   if (to.meta.requiresAuth && !isAuthenticated) {
     console.log("Not authenticated. Redirecting to /auth.");

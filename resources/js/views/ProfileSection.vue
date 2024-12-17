@@ -14,16 +14,11 @@
     >
       <span>{{ toastMessage }}</span>
     </div>
-    <div
-      class="max-w-2xl w-full bg-white rounded-xl shadow-2xl overflow-hidden lg:mt-5"
-    >
+    <div class="max-w-2xl w-full bg-white rounded-xl shadow-2xl overflow-hidden lg:mt-5">
       <div class="bg-gray-100 p-8 relative">
         <!-- Decorative Pattern Background -->
         <div class="absolute inset-0 bg-opacity-50 bg-gray-200">
-          <svg
-            class="absolute inset-0 h-full w-full"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+          <svg class="absolute inset-0 h-full w-full" xmlns="http://www.w3.org/2000/svg">
             <pattern
               id="pattern-circles"
               x="0"
@@ -34,21 +29,13 @@
             >
               <circle cx="10" cy="10" r="1.6" fill="#a0aec0" />
             </pattern>
-            <rect
-              x="0"
-              y="0"
-              width="100%"
-              height="100%"
-              fill="url(#pattern-circles)"
-            />
+            <rect x="0" y="0" width="100%" height="100%" fill="url(#pattern-circles)" />
           </svg>
         </div>
 
         <!-- Profile Content -->
         <div class="relative z-10">
-          <h2
-            class="text-2xl md:text-3xl font-bold text-gray-800 mb-6 text-center"
-          >
+          <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6 text-center">
             User Profile
           </h2>
 
@@ -73,27 +60,19 @@
 
           <!-- Contact Information -->
           <div class="space-y-3 mb-6">
-            <div
-              class="flex items-center space-x-3 bg-white rounded-lg p-3 shadow"
-            >
+            <div class="flex items-center space-x-3 bg-white rounded-lg p-3 shadow">
               <MailIcon class="w-4 h-4 md:w-5 md:h-5 text-black" />
               <p class="text-gray-700">{{ user.email }}</p>
             </div>
-            <div
-              class="flex items-center space-x-3 bg-white rounded-lg p-3 shadow"
-            >
+            <div class="flex items-center space-x-3 bg-white rounded-lg p-3 shadow">
               <PhoneIcon class="w-4 h-4 md:w-5 md:h-5 text-black" />
               <p class="text-gray-700">{{ user.phone }}</p>
             </div>
-            <div
-              class="flex items-center space-x-3 bg-white rounded-lg p-3 shadow"
-            >
+            <div class="flex items-center space-x-3 bg-white rounded-lg p-3 shadow">
               <MailIcon class="w-4 h-4 md:w-5 md:h-5 text-black" />
               <p class="text-gray-700">{{ user.carsuEmail }}</p>
             </div>
-            <div
-              class="flex items-center space-x-3 bg-white rounded-lg p-3 shadow"
-            >
+            <div class="flex items-center space-x-3 bg-white rounded-lg p-3 shadow">
               <Hash class="w-4 h-4 md:w-5 md:h-5 text-black" />
               <p class="text-gray-700">{{ user.csuIdNumber }}</p>
             </div>
@@ -259,14 +238,8 @@ const fetchUserTransactions = async () => {
       .eq("users_info_id", userInfoId);
 
     if (userTransactError || !userTransacts || userTransacts.length === 0) {
-      console.error(
-        "Error fetching user_transacts:",
-        userTransactError?.message
-      );
-      showToast(
-        "User transactions not found. Please contact support.",
-        "error"
-      );
+      console.error("Error fetching user_transacts:", userTransactError?.message);
+      showToast("User transactions not found. Please contact support.", "error");
       return;
     }
 
@@ -331,9 +304,7 @@ async function fetchUserDetails() {
 
     const { data, error } = await supabase
       .from("users_info")
-      .select(
-        "email, phone_number, fullname, csu_id_number, occupation, carsu_email"
-      )
+      .select("email, phone_number, fullname, csu_id_number, occupation, carsu_email")
       .eq("id", loggedInUser.id)
       .single();
 
@@ -378,9 +349,7 @@ export default {
     showToast(message, type) {
       this.toastMessage = message;
       this.toastColor =
-        type === "success"
-          ? "bg-green-500 text-white"
-          : "bg-red-500 text-white";
+        type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white";
       this.toastVisible = true;
       setTimeout(() => {
         this.hideToast();

@@ -3,6 +3,16 @@
     class="leading-normal tracking-normal text-white gradient"
     style="font-family: 'Source Sans Pro', sans-serif"
   >
+    <div
+      :class="[
+        'transparency fixed top-5 left-1/2 transform -translate-x-1/2 z-50 p-4 rounded shadow-lg transition-opacity duration-500',
+        toastVisible ? 'opacity-100' : 'opacity-0',
+        toastColor,
+      ]"
+      @transitionend="onTransitionEnd"
+    >
+      <span>{{ toastMessage }}</span>
+    </div>
     <!--Nav-->
     <nav id="header" class="fixed w-full z-30 top-0 text-white">
       <div
@@ -792,20 +802,27 @@
                   <div class="h-1 mx-auto gradient w-4/6 my-0 py-0 rounded-t"></div>
                 </div>
 
-                <form class="flex flex-col">
+                <form class="flex flex-col" id="feedbackForm">
                   <input
-                    type="name"
-                    class="bg-gray-100 mb-2 text-gray-800 border-0 rounded-md p-2 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-orange-600 transition ease-in-out duration-150"
+                    type="text"
+                    id="name"
                     placeholder="Enter your name"
+                    class="bg-gray-100 mb-2 text-gray-800 border-0 rounded-md p-2"
                   />
                   <input
                     type="email"
-                    class="bg-gray-100 mb-2 text-gray-800 border-0 rounded-md p-2 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-orange-600 transition ease-in-out duration-150"
+                    id="email"
                     placeholder="Enter your email address"
+                    class="bg-gray-100 mb-2 text-gray-800 border-0 rounded-md p-2"
                   />
-                  <textarea class="textarea" placeholder="Enter a message..."></textarea>
+                  <textarea
+                    id="message"
+                    placeholder="Enter a message..."
+                    class="bg-gray-100 mb-2 text-gray-800 border-0 rounded-md p-2"
+                  ></textarea>
                   <button
-                    class="mx-auto lg:mx-0 hover:underline gradient text-white font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                    type="submit"
+                    class="mx-auto bg-orange-600 text-white rounded-md py-2 px-4"
                   >
                     Send message
                   </button>
@@ -1161,104 +1178,64 @@ export default {
   data() {
     return {
       zoomedImage: null, // Tracks which image is zoomed
+      toastMessage: "", // Message to display in toast
+      toastColor: "", // Toast background color
+      toastVisible: false, // Toast visibility
     };
-  },
-  mounted() {
-    let scrollpos = window.scrollY;
-    const header = document.getElementById("header");
-    const navcontent = document.getElementById("nav-content");
-    const navaction = document.getElementById("navAction");
-    const toToggle = document.querySelectorAll(".toggleColour");
-    const navMenuDiv = document.getElementById("nav-content");
-    const navMenu = document.getElementById("nav-toggle");
-
-    // Scroll event handler
-    document.addEventListener("scroll", () => {
-      scrollpos = window.scrollY;
-
-      if (scrollpos > 10) {
-        if (header) {
-          header.classList.add("bg-white", "shadow");
-        }
-        if (navaction) {
-          navaction.classList.replace("bg-white", "gradient");
-          navaction.classList.replace("text-gray-800", "text-white");
-        }
-
-        toToggle.forEach((el) => {
-          if (el) {
-            el.classList.replace("text-white", "text-gray-800");
-          }
-        });
-
-        if (navcontent) {
-          navcontent.classList.replace("bg-gray-100", "bg-white");
-        }
-      } else {
-        if (header) {
-          header.classList.remove("bg-white", "shadow");
-        }
-        if (navaction) {
-          navaction.classList.replace("gradient", "bg-white");
-          navaction.classList.replace("text-white", "text-gray-800");
-        }
-
-        toToggle.forEach((el) => {
-          if (el) {
-            el.classList.replace("text-gray-800", "text-white");
-          }
-        });
-
-        if (navcontent) {
-          navcontent.classList.replace("bg-white", "bg-gray-100");
-        }
-      }
-    });
-
-    // Carousel button event handler
-    document
-      .querySelectorAll(".carousel__next, .carousel__prev, .carousel__navigation-button")
-      .forEach((link) => {
-        link.addEventListener("click", function (event) {
-          event.preventDefault();
-          const targetId = this.getAttribute("href").substring(1);
-          const targetElement = document.getElementById(targetId);
-          if (targetElement) {
-            targetElement.scrollIntoView({
-              behavior: "smooth",
-              block: "nearest",
-              inline: "start",
-            });
-          }
-        });
-      });
-
-    // Handle nav menu toggle
-    document.onclick = function (e) {
-      const target = e.target || e.srcElement;
-
-      if (navMenuDiv && navMenu) {
-        if (!checkParent(target, navMenuDiv) && checkParent(target, navMenu)) {
-          navMenuDiv.classList.toggle("hidden");
-        } else if (!checkParent(target, navMenuDiv)) {
-          navMenuDiv.classList.add("hidden");
-        }
-      }
-    };
-
-    // Helper function to check if a target is a child of a specific element
-    function checkParent(t, elm) {
-      while (t.parentNode) {
-        if (t === elm) return true;
-        t = t.parentNode;
-      }
-      return false;
-    }
   },
   methods: {
+    // Show toast method
+    showToast(message, type) {
+      this.toastMessage = message;
+      this.toastColor =
+        type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white";
+      this.toastVisible = true;
+
+      setTimeout(() => {
+        this.hideToast();
+      }, 3000);
+    },
+
+    // Hide toast method
+    hideToast() {
+      this.toastVisible = false;
+    },
+
     toggleZoom(imageId) {
       this.zoomedImage = this.zoomedImage === imageId ? null : imageId;
     },
+
+    // Form submission method
+    async submitFeedback(event) {
+      event.preventDefault();
+
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const message = document.getElementById("message").value;
+
+      try {
+        const response = await fetch("http://localhost:5000/send-feedback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, message }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          this.showToast("Feedback sent successfully!", "success");
+        } else {
+          this.showToast("Failed to send feedback.", "error");
+        }
+      } catch (error) {
+        console.error(error);
+        this.showToast("An error occurred while sending feedback.", "error");
+      }
+    },
+  },
+  mounted() {
+    document
+      .getElementById("feedbackForm")
+      .addEventListener("submit", this.submitFeedback);
   },
 };
 </script>
